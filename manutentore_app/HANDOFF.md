@@ -172,6 +172,17 @@ cuscinetto: l'artefatto che il manutentore già sa leggere.
   il sole, non è il caso principale.
 - **Raggio 6 px**, non pillole. È una targa, non un bottone di un social.
 
+### Avvio — scuro, non di sistema
+Lo sfondo di avvio è `#171A1D` fisso su entrambe le piattaforme: iOS nel
+`LaunchScreen.storyboard`, Android in `@color/sfondo_avvio` usato sia dal
+`launch_background` sia dal `windowBackground` del `NormalTheme`.
+
+Fisso e non "di sistema" perché **il default della app è il tema scuro**, non
+`sistema`: seguire l'aspetto del telefono darebbe un lampo bianco a chiunque
+abbia il telefono in chiaro e la app nella sua configurazione di fabbrica, che
+è il caso più comune. Il prezzo è il caso opposto — chi sceglie il tema chiaro
+vede un lampo scuro — ed è il male minore.
+
 ### Icona — fatta
 Esagono (testa di vite: il meccanico) con **Ω ritagliata** dentro (l'elettrico),
 in giallo sicurezza su targa scura. Sorgente in `design/icona.svg`, con l'Ω già

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T.groundDark. L'app parte in tema scuro (PreferenzaTema.scuro e' il
+         default), quindi lo sfondo di avvio e' scuro sempre, non "di sistema":
+         seguire il sistema darebbe un lampo bianco a chi ha il telefono in
+         chiaro e l'app, come da default, in scuro. -->
+    <color name="sfondo_avvio">#171A1D</color>
+</resources>
