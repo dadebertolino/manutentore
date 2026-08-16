@@ -247,12 +247,40 @@ mano prima di aggiungere qualcosa:
 ./tool/verifica_privacy.sh
 ```
 
-Controlla i `pubspec.yaml` (cosa abbiamo dichiarato) **e i `pubspec.lock`**
-(cosa è stato risolto davvero): è quest'ultimo che conta, perché un pacchetto
-approvato può tirarsi dietro `firebase_core` senza che nessuno lo scriva mai in
-un pubspec. La lista dei nomi vietati sta in cima allo script — se la allarghi,
-allarga anche questo elenco. Un secondo controllo in CI verifica che
-`manutentore_core` resti **senza dipendenze a runtime**.
+Fa tre controlli:
+
+1. **I `pubspec.yaml` e i `pubspec.lock`.** È il lock che conta: un pacchetto
+   approvato può tirarsi dietro `firebase_core` senza che nessuno lo scriva mai
+   in un pubspec. La lista dei nomi vietati sta in cima allo script.
+2. **Nessun permesso nel manifest Android di produzione.** Su Android il
+   permesso `INTERNET` va dichiarato: senza, è il sistema operativo a impedire
+   ogni richiesta di rete, chiunque provi a farla — anche una dipendenza
+   transitiva. È la garanzia più forte che l'app abbia, e non va persa per
+   distrazione. I manifest di `debug` e `profile` lo dichiarano perché serve
+   all'hot reload, e non vengono spediti.
+3. **Nessuna chiamata di rete nel nostro codice**: né `package:http`, né le API
+   di `printing` che scaricano font (`PdfGoogleFonts`, `downloadFont`). Vedi
+   sotto perché serve.
+
+Un quarto controllo in CI verifica che `manutentore_core` resti **senza
+dipendenze a runtime**.
+
+### `pdf` e `printing`: perché `http` nell'albero non è una crepa
+
+`printing` dipende da `http`. Non è un tradimento della promessa: quella
+dipendenza serve **solo** a `PdfGoogleFonts`, che scarica font da Google al
+momento. Noi i font ce li abbiamo già in `assets/fonts/` (§4: self-hosted, mai
+da CDN), quindi quel codice non viene mai raggiunto. Il plugin, verificato nel
+suo `AndroidManifest.xml`, **non aggiunge nessun permesso**: dichiara solo un
+`FileProvider` per passare il PDF al foglio di condivisione.
+
+Le due garanzie non sono però simmetriche, e vale la pena saperlo:
+
+- **Su Android** è il sistema a garantire: senza permesso `INTERNET` nel
+  manifest di produzione, la richiesta non parte comunque. Controllo 2.
+- **Su iOS** non esiste un permesso per la rete: qualunque app può farla.
+  Lì l'unica garanzia è che quelle chiamate non compaiano nel nostro codice.
+  Controllo 3.
 
 Se un pacchetto legittimo finisce nella lista per omonimia, la risposta non è
 cancellare la riga di nascosto: è discuterne e, se il pacchetto entra davvero,

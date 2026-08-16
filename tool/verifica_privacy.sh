@@ -84,11 +84,58 @@ while IFS= read -r file; do
 done < <(find . -name 'pubspec.yaml' -o -name 'pubspec.lock' \
          | grep -v '/build/' | grep -v '/.dart_tool/' | sort)
 
-if [ "$trovati" -gt 0 ]; then
-  echo
-  echo "$trovati dipendenza/e di tracciamento in $esaminati file esaminati."
-  echo "La promessa privacy dell'app e' pubblica: vedi HANDOFF.md §5."
-  exit 1
+if [ "$trovati" -eq 0 ]; then
+  echo "OK  nessun pacchetto di tracciamento in $esaminati file esaminati."
 fi
 
-echo "OK  nessun pacchetto di tracciamento in $esaminati file esaminati."
+# --- 2. Nessun permesso di sistema nel manifest che va in produzione ---
+#
+# HANDOFF §5: "Permessi di sistema: il minimo. Oggi l'app non ne richiede
+# nessuno. Se una feature ne introduce uno, va discusso prima." Questo lo rende
+# vero e non solo scritto.
+#
+# Su Android il permesso INTERNET va dichiarato: senza, il sistema operativo
+# impedisce ogni richiesta di rete, chiunque sia a provarci — anche una
+# dipendenza transitiva. E' la garanzia piu' forte che l'app abbia, e vale la
+# pena non perderla per distrazione. I manifest di debug e profile lo
+# dichiarano perche' serve a Flutter per l'hot reload, e non vengono spediti.
+MANIFEST=manutentore_app/android/app/src/main/AndroidManifest.xml
+if [ -f "$MANIFEST" ]; then
+  permessi=$(grep -c "uses-permission" "$MANIFEST" || true)
+  if [ "$permessi" -gt 0 ]; then
+    echo
+    echo "BLOCCATO  $MANIFEST dichiara dei permessi:"
+    grep "uses-permission" "$MANIFEST" \
+      | grep -o 'android:name="[^"]*"' \
+      | sed 's/android:name=//; s/"//g; s/^/          /'
+    echo "Vanno discussi prima di entrare: vedi HANDOFF.md §5."
+    trovati=$((trovati + 1))
+  else
+    echo "OK  nessun permesso di sistema nel manifest di produzione."
+  fi
+fi
+
+# --- 3. Il nostro codice non deve fare rete, nemmeno di rimbalzo ---
+#
+# `printing` porta `http` fra le dipendenze, ma solo per una funzione che non
+# usiamo: scaricare font da Google al volo. Noi i font ce li abbiamo in
+# assets/fonts/ (§4: self-hosted, mai da CDN). Su Android il permesso mancante
+# basterebbe; su iOS non esiste un permesso per la rete, quindi li' l'unica
+# garanzia e' che quelle chiamate non compaiano nel nostro codice.
+SORGENTI="manutentore_app/lib manutentore_core/lib"
+VIETATE_IN_CODICE='package:http/|PdfGoogleFonts|downloadFont|PdfBaseCache'
+if colpite=$(grep -rnE "$VIETATE_IN_CODICE" $SORGENTI 2>/dev/null); then
+  echo
+  echo "BLOCCATO  il codice usa API che fanno rete:"
+  echo "$colpite" | sed 's/^/          /'
+  echo "I font del PDF si caricano da assets/fonts/: vedi HANDOFF.md §5."
+  trovati=$((trovati + 1))
+else
+  echo "OK  nessuna chiamata di rete nel codice dei due package."
+fi
+
+if [ "$trovati" -gt 0 ]; then
+  echo
+  echo "$trovati problema/i. La promessa privacy dell'app e' pubblica."
+  exit 1
+fi
