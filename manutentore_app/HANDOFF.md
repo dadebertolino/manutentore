@@ -33,26 +33,31 @@ manutentore/
 │   ├── lib/src/electrical.dart  8 calcolatori
 │   ├── lib/src/mechanical.dart  9 calcolatori
 │   ├── lib/src/registry.dart    Registro + ricerca + verifica integrità
-│   └── test/                    ~40 test con valori di riferimento verificati
+│   └── test/                    36 test con valori di riferimento verificati
 └── manutentore_app/       App Flutter — SCHELETRO FUNZIONANTE
     ├── lib/theme/         Token e temi chiaro/scuro
-    ├── lib/state/         Impostazioni, preferiti (ChangeNotifier + prefs)
+    ├── lib/state/         impostazioni.dart: modalità, tema, preferiti
+    │                      (ChangeNotifier + prefs, un file solo)
     ├── lib/ui/            Home, schermata di calcolo generica, widget
-    └── test/              Smoke test
+    ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
+    └── test/              5 test di superficie sulla UI
 ```
 
 I due package sono **cartelle sorelle**. `manutentore_app/pubspec.yaml`
 referenzia il core con `path: ../manutentore_core`. Non spostarli senza
 aggiornare quel path.
 
-### ⚠️ Nulla è mai stato compilato
+### Build verde
 
-Il core e l'app sono stati scritti in un ambiente senza Dart né Flutter.
-I valori attesi nei test del core sono stati calcolati e verificati
-indipendentemente (in Python) **prima** di essere scritti nei test, quindi la
-matematica è affidabile. Il codice invece non ha mai visto un compilatore.
+Il core e l'app sono stati scritti in un ambiente senza Dart né Flutter, e fino
+al 2026-08-16 questo documento avvisava che nulla era mai stato compilato. Non
+è più così: il primo commit (`c29b763`) porta entrambi i package a build verde.
+Stato verificato il 2026-08-16:
 
-**Primo compito, prima di qualsiasi feature:**
+| package | `analyze` | test |
+|---|---|---|
+| `manutentore_core` | pulito | 36 passati |
+| `manutentore_app`  | pulito | 5 passati |
 
 ```bash
 cd manutentore_core && dart pub get && dart analyze && dart test
@@ -60,15 +65,18 @@ cd ../manutentore_app && flutter pub get && flutter analyze && flutter test
 flutter run
 ```
 
-Aspettati errori di sintassi, import mancanti, API Flutter cambiate di
-versione. Correggili senza cambiare le formule: se un test del core fallisce,
-**il sospettato numero uno è il test, non la formula** — ricontrolla il valore
-atteso a mano prima di toccare il calcolo. Se una formula è davvero sbagliata,
-correggila e annota qui cosa e perché.
+Su una macchina nuova, la prima volta: `cd manutentore_app/ios && pod install`.
 
-Punti fragili noti nella UI (API che variano tra versioni di Flutter):
-`DropdownButtonFormField.value` vs `.initialValue`, `withAlpha` vs
-`withValues`, `SegmentedButton`, `ListenableBuilder`, `showDragHandle`.
+Se un test del core fallisce, la regola resta: **il sospettato numero uno è il
+test, non la formula.** I valori attesi sono stati calcolati e verificati
+indipendentemente (in Python) *prima* di essere scritti, quindi ricontrolla il
+valore atteso a mano prima di toccare il calcolo. Se una formula è davvero
+sbagliata, correggila e annota qui cosa e perché.
+
+Se aggiorni la versione di Flutter, le API che qui hanno già dato problemi e
+che vale la pena ricontrollare per prime sono: `DropdownButtonFormField.value`
+vs `.initialValue`, `withAlpha` vs `withValues`, `SegmentedButton`,
+`ListenableBuilder`, `showDragHandle`.
 
 ---
 
@@ -100,8 +108,10 @@ Ogni pacchetto in più è un pacchetto da giustificare (vedi §5).
 ### Modalità studente / professionista
 
 Stesso motore, due letture. Studente: `theory`, `help` sui campi, `warnings`.
-Professionista: campi e risultato, niente prosa. È un flag booleano nel form,
-non due codebase.
+Professionista: campi e risultato, niente prosa. Non sono due codebase: è
+l'enum `Modalita` in `state/impostazioni.dart`, globale e persistito nelle
+prefs, che si commuta dal foglio impostazioni. Le schermate lo leggono con
+`ImpostazioniScope.of(context).isStudente`. Il default è `professionista`.
 
 ---
 
@@ -129,10 +139,15 @@ cuscinetto: l'artefatto che il manutentore già sa leggere.
 - **Raggio 6 px**, non pillole. È una targa, non un bottone di un social.
 
 ### Font — da fare
-I file non sono nel repo. Scaricare **IBM Plex Sans** e **IBM Plex Mono**
-(licenza OFL) in `assets/fonts/` e decommentare il blocco `fonts:` in
-`pubspec.yaml`. **Self-hosted, mai da CDN** (§5). Finché mancano, Flutter
-ripiega sul font di sistema: l'app gira ma le cifre non sono tabulari.
+I file non sono nel repo e `assets/` non esiste ancora. Scaricare **IBM Plex
+Sans** e **IBM Plex Mono** (licenza OFL) in `assets/fonts/` e decommentare il
+blocco `fonts:` in `pubspec.yaml`. **Self-hosted, mai da CDN** (§5).
+
+Il codice referenzia già le famiglie per nome (`T.sans`, `T.mono`), quindi
+finché i file mancano **il ripiego sul font di sistema è silenzioso**: nessun
+errore, nessun avviso, l'app gira e sembra a posto. Cambia solo che le cifre
+non sono tabulari e ballano mentre si digita. È una regressione che non si vede
+in uno screenshot: non fidarti dell'occhio, controlla che gli asset ci siano.
 
 ---
 
@@ -155,8 +170,25 @@ e deve restare vera *e verificabile*.
 - **Store**: categoria Education o Utilities, mai Medical. Play target audience
   18+. Data safety: nessun dato raccolto.
 
-Il repo va con un **check in CI che fa fallire la build** se in `pubspec.yaml`
-compare un pacchetto di tracking (vedi backlog).
+Questi vincoli non sono affidati alla buona memoria: `tool/verifica_privacy.sh`
+**fa fallire la build** se un pacchetto di tracciamento entra fra le
+dipendenze. Gira in CI a ogni push ed è pensato per essere lanciato anche a
+mano prima di aggiungere qualcosa:
+
+```bash
+./tool/verifica_privacy.sh
+```
+
+Controlla i `pubspec.yaml` (cosa abbiamo dichiarato) **e i `pubspec.lock`**
+(cosa è stato risolto davvero): è quest'ultimo che conta, perché un pacchetto
+approvato può tirarsi dietro `firebase_core` senza che nessuno lo scriva mai in
+un pubspec. La lista dei nomi vietati sta in cima allo script — se la allarghi,
+allarga anche questo elenco. Un secondo controllo in CI verifica che
+`manutentore_core` resti **senza dipendenze a runtime**.
+
+Se un pacchetto legittimo finisce nella lista per omonimia, la risposta non è
+cancellare la riga di nascosto: è discuterne e, se il pacchetto entra davvero,
+aggiornare sia lo script sia questa sezione.
 
 ---
 
@@ -187,44 +219,40 @@ compare un pacchetto di tracking (vedi backlog).
 ## 7. Backlog, in ordine
 
 ### Sbloccare
-1. **Far compilare e passare i test.** Vedi §2. Prima di tutto il resto.
-2. **CI GitHub Actions**: `analyze` + `test` sui due package, più il
-   **deny-list** che fa fallire la build se `pubspec.yaml` contiene
-   `firebase`, `admob`, `sentry`, `analytics`, `facebook`, `appsflyer`.
-3. **Font IBM Plex** in `assets/fonts/`.
+1. **Font IBM Plex** in `assets/fonts/`. Vedi §4: oggi manca in silenzio.
 
 ### Rendere usabile in campo
-4. **Cronologia dei calcoli**: ultimi 50, locale, con ripristino degli input.
+2. **Cronologia dei calcoli**: ultimi 50, locale, con ripristino degli input.
    Stesso pattern di `preferiti` in `Impostazioni`.
-5. **Persistenza degli input per calcolatore**: riaprendo un calcolatore
+3. **Persistenza degli input per calcolatore**: riaprendo un calcolatore
    ritrova gli ultimi valori usati. In campo si rifà lo stesso calcolo con una
    variabile diversa.
-6. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
+4. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
    share sheet (mai upload). È la funzione che fa scaricare l'app a chi lavora
    davvero. Valuta `pdf` + `printing` — sono da approvare come dipendenze.
-7. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
+5. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
    supporto al text scaling fino a 200% senza overflow nella `TargaRisultato`.
 
 ### Crescere in contenuto
-8. **Altri calcolatori**: sezione da corrente di corto, resistenza di
+6. **Altri calcolatori**: sezione da corrente di corto, resistenza di
    isolamento, termocoppie K/J, ISO VG e compatibilità grassi, allineamento
    alberi, tolleranze ISO H7/g6, perdite di carico nelle tubazioni, MTBF/MTTR
    e OEE.
-9. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
+7. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
    ISO 1219, codici colore, classi IP/IK, coppie di serraggio a colpo d'occhio.
    Serve un nuovo tipo di scheda nel registro — progettalo, non forzarlo dentro
    `Calculator`.
-10. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
-    all'avviamento"*, *"cuscinetto rumoroso"*: sequenze di verifiche dove
-    l'esito determina il passo successivo. È la parte con più valore didattico
-    e la meno banale da modellare: **serve un modello dati nuovo** (nodo,
-    esito, ramo, esito terminale), non un `Calculator`. Progettalo insieme a
-    Davide prima di implementare.
+8. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
+   all'avviamento"*, *"cuscinetto rumoroso"*: sequenze di verifiche dove
+   l'esito determina il passo successivo. È la parte con più valore didattico
+   e la meno banale da modellare: **serve un modello dati nuovo** (nodo,
+   esito, ramo, esito terminale), non un `Calculator`. Progettalo insieme a
+   Davide prima di implementare.
 
 ### Pubblicare
-11. Icona, splash, screenshot **senza dati reali**, testi store con
-    inquadramento adulto, privacy policy su davidebertolino.it, README con
-    sezione privacy.
+9. Icona, splash, screenshot **senza dati reali**, testi store con
+   inquadramento adulto, privacy policy su davidebertolino.it, README con
+   sezione privacy.
 
 ---
 

@@ -12,5 +12,9 @@ flutter test
 flutter run
 ```
 
+Le cartelle native ci sono già (`it.davidebertolino.manutentore`). Su macOS,
+la prima volta: `cd ios && pod install`. Stato al 2026-08-16: `flutter analyze`
+pulito, 5 test verdi.
+
 **Prima di lavorarci: leggi `HANDOFF.md`.** Contiene architettura, direzione di
 design, vincoli privacy non negoziabili e backlog in ordine di priorità.
