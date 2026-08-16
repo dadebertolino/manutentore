@@ -1,0 +1,14 @@
+name: manutentore_core
+description: >-
+  Motore di calcolo per il breviario del manutentore: formule elettriche e
+  meccaniche per diagnostica e riparazione. Dart puro, nessuna dipendenza,
+  nessuna rete, nessuna raccolta dati.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.3.0
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0
