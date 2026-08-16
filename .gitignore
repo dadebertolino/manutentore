@@ -2,7 +2,9 @@
 .dart_tool/
 .packages
 build/
-pubspec.lock
+# pubspec.lock e' versionato di proposito: senza, ogni build risolve da capo e
+# due corse identiche possono prendere versioni diverse. Aggiornalo con
+# `pub upgrade` in un commit che si vede.
 *.iml
 .idea/
 .vscode/
