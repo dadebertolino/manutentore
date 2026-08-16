@@ -73,7 +73,7 @@ void main() {
     expect(find.textContaining('Sezione'), findsWidgets);
   });
 
-  test('ogni calcolatore del registro e\' apribile senza eccezioni', () {
+  test('ogni calcolatore del registro è apribile senza eccezioni', () {
     for (final c in Registro.tutti) {
       expect(
         () => c.compute(Inputs.defaults(c.fields)),
@@ -158,7 +158,7 @@ void main() {
       expect(cron.voci.first.valori['lung'], 45);
     });
 
-    test('oltre il massimo cadono le voci piu\' vecchie', () async {
+    test('oltre il massimo cadono le voci più vecchie', () async {
       SharedPreferences.setMockInitialValues({});
       final cron = await Cronologia.carica();
       for (var i = 0; i < Cronologia.massimo + 10; i++) {
@@ -199,7 +199,7 @@ void main() {
     test('una voce illeggibile non impedisce di leggere le altre', () async {
       SharedPreferences.setMockInitialValues({
         'cronologia': <String>[
-          'non e\' json',
+          'non è json',
           '{"id":"el.caduta_tensione","v":{"lung":45},"t":1767225600000}',
           '{"manca":"tutto"}',
         ],

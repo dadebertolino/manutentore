@@ -8,7 +8,7 @@ void quasi(double atteso, double ottenuto, {double tol = 1e-3}) {
 
 void main() {
   group('Registro', () {
-    test('integrita\' del registro', () {
+    test('integrità del registro', () {
       expect(Registro.verificaIntegrita(), isEmpty);
     });
 
@@ -31,6 +31,24 @@ void main() {
         contains('el.rifasamento'),
       );
       expect(Registro.cerca('zzzz'), isEmpty);
+    });
+
+    test('la ricerca ignora gli accenti', () {
+      // I nomi dei calcolatori portano l'accento vero ("Severità
+      // vibrazioni"), ma in campo si digita senza. Chi tocca _normalizza
+      // deve far cadere questo test, non accorgersene dagli utenti.
+      expect(
+        Registro.cerca('severita').map((c) => c.id),
+        contains('me.vibrazioni_iso'),
+      );
+      expect(
+        Registro.cerca('severità').map((c) => c.id),
+        contains('me.vibrazioni_iso'),
+      );
+      expect(
+        Registro.cerca('velocita').map((c) => c.id),
+        contains('me.potenza_coppia'),
+      );
     });
 
     test('input non numerico produce messaggio utile', () {
@@ -152,13 +170,13 @@ void main() {
       quasi(16.597, r.numeric('Potenza reattiva necessaria'));
       quasi(
         110.06,
-        r.numeric('Capacita\' per fase (triangolo, 50 Hz)'),
+        r.numeric('Capacità per fase (triangolo, 50 Hz)'),
         tol: 2e-3,
       );
       quasi(21.05, r.numeric('Riduzione di corrente'), tol: 5e-3);
     });
 
-    test('rifasamento in senso inverso e\' rifiutato', () {
+    test('rifasamento in senso inverso è rifiutato', () {
       expect(
         () => const Rifasamento().run({
           'p': 30.0,
@@ -183,7 +201,7 @@ void main() {
       });
       quasi(14.4724, r.numeric('Corrente nominale'));
       quasi(49.7396, r.numeric('Coppia nominale'));
-      quasi(1500, r.numeric('Velocita\' di sincronismo'));
+      quasi(1500, r.numeric('Velocità di sincronismo'));
       quasi(4.0, r.numeric('Scorrimento'));
       quasi(94.07, r.numeric('Corrente di spunto (diretto)'), tol: 2e-3);
     });
@@ -396,7 +414,7 @@ void main() {
       );
     });
 
-    test('severita\' vibrazioni ISO 10816', () {
+    test('severità vibrazioni ISO 10816', () {
       final r = const SeveritaVibrazioni().run({
         'v': 3.2,
         'gruppo': 'G2',
@@ -437,7 +455,7 @@ void main() {
       quasi(50.02, r.numeric('Portata richiesta'), tol: 2e-3);
     });
 
-    test('stelo piu\' grande dell\'alesaggio e\' rifiutato', () {
+    test('stelo più grande dell\'alesaggio è rifiutato', () {
       expect(
         () => const CilindroPneumatico().run({
           'alesaggio': 20.0,
@@ -460,7 +478,7 @@ void main() {
         'densita': 1.0,
       });
       quasi(16.7705, r.numeric('Kv'));
-      quasi(19.388, r.numeric('Cv (unita\' imperiali)'));
+      quasi(19.388, r.numeric('Cv (unità imperiali)'));
     });
 
     test('Kv: i tre versi sono coerenti', () {
@@ -486,8 +504,8 @@ void main() {
         'p': 7.5,
       });
       quasi(2.5, r.numeric('Rapporto di trasmissione'));
-      quasi(580.0, r.numeric('Velocita\' condotta'));
-      quasi(7.5922, r.numeric('Velocita\' periferica'));
+      quasi(580.0, r.numeric('Velocità condotta'));
+      quasi(7.5922, r.numeric('Velocità periferica'));
       quasi(1759.15, r.numeric('Lunghezza primitiva cinghia'), tol: 1e-3);
       quasi(
         165.64,
@@ -496,7 +514,7 @@ void main() {
       );
     });
 
-    test('potenza-coppia-velocita\' invertibile', () {
+    test('potenza-coppia-velocità invertibile', () {
       final c = const PotenzaCoppiaVelocita()
           .run({'incognita': 'c', 'p': 7.5, 'n': 1440.0, 'c': 0.0, 'rend': 1.0})
           .numeric('Coppia');
@@ -507,7 +525,7 @@ void main() {
       quasi(7.5, p);
       final n = const PotenzaCoppiaVelocita()
           .run({'incognita': 'n', 'p': 7.5, 'n': 0.0, 'c': c, 'rend': 1.0})
-          .numeric('Velocita\'');
+          .numeric('Velocità');
       quasi(1440.0, n);
     });
   });

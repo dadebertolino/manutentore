@@ -311,7 +311,7 @@ class ForoMaschiatura extends Calculator {
       warnings: const [
         'Su materiali teneri (alluminio, ottone) conviene stare sul 65-70% '
             'per non strappare il filetto.',
-        'Profondita\' utile di avvitamento: 1xd su acciaio, 2xd su alluminio.',
+        'Profondità utile di avvitamento: 1xd su acciaio, 2xd su alluminio.',
       ],
     );
   }
@@ -337,9 +337,9 @@ class VitaCuscinetto extends Calculator {
   List<String> get references => ['ISO 281'];
   @override
   String? get theory =>
-      'L10 e\' la vita raggiunta dal 90% dei cuscinetti identici. Il carico '
+      'L10 è la vita raggiunta dal 90% dei cuscinetti identici. Il carico '
       'entra alla terza potenza: dimezzare il carico moltiplica la durata per '
-      'otto. Ecco perche\' un disallineamento paga carissimo.';
+      'otto. Ecco perché un disallineamento paga carissimo.';
 
   @override
   List<FieldSpec> get fields => const [
@@ -361,7 +361,7 @@ class VitaCuscinetto extends Calculator {
     ),
     FieldSpec.number(
       'n',
-      'Velocita\' di rotazione',
+      'Velocità di rotazione',
       unit: 'rpm',
       min: 0.1,
       max: 50000,
@@ -378,7 +378,7 @@ class VitaCuscinetto extends Calculator {
     ),
     FieldSpec.number(
       'a1',
-      'Fattore di affidabilita\' a1',
+      'Fattore di affidabilità a1',
       min: 0.05,
       max: 1,
       value: 1,
@@ -457,7 +457,7 @@ class VitaCuscinetto extends Calculator {
       verdictSeverity: lnmh >= 20000 ? Severity.ok : Severity.warn,
       warnings: const [
         'La vita reale dipende anche da montaggio, allineamento e tenute: '
-            'la maggior parte dei cedimenti precoci non e\' a fatica.',
+            'la maggior parte dei cedimenti precoci non è a fatica.',
       ],
     );
   }
@@ -491,14 +491,14 @@ class FrequenzeCuscinetto extends Calculator {
   @override
   String? get theory =>
       'Ogni difetto ha la sua firma in frequenza: se lo spettro mostra un picco '
-      'alla BPFO, il difetto e\' sulla pista esterna. Sono frequenze non '
+      'alla BPFO, il difetto è sulla pista esterna. Sono frequenze non '
       'sincrone con la rotazione, quindi non si confondono con lo sbilanciamento.';
 
   @override
   List<FieldSpec> get fields => const [
     FieldSpec.number(
       'n',
-      'Velocita\' albero',
+      'Velocità albero',
       unit: 'rpm',
       min: 1,
       max: 30000,
@@ -546,7 +546,7 @@ class FrequenzeCuscinetto extends Calculator {
     final dp = i.num_('dp');
     if (d >= dp) {
       throw const CalcException(
-        'Il corpo volvente non puo\' essere piu\' grande del primitivo.',
+        'Il corpo volvente non può essere più grande del primitivo.',
       );
     }
     final alfa = i.num_('alfa') * math.pi / 180;
@@ -633,7 +633,7 @@ class SeveritaVibrazioni extends Calculator {
   @override
   String get id => 'me.vibrazioni_iso';
   @override
-  String get name => 'Severita\' vibrazioni';
+  String get name => 'Severità vibrazioni';
   @override
   String get subtitle => 'Classificazione in zone A-D secondo ISO 10816-3';
   @override
@@ -647,7 +647,7 @@ class SeveritaVibrazioni extends Calculator {
   List<FieldSpec> get fields => const [
     FieldSpec.number(
       'v',
-      'Velocita\' efficace misurata',
+      'Velocità efficace misurata',
       unit: 'mm/s RMS',
       min: 0,
       max: 100,
@@ -726,8 +726,8 @@ class SeveritaVibrazioni extends Calculator {
       verdict: 'Zona $zona',
       verdictSeverity: sev,
       warnings: const [
-        'La tendenza nel tempo conta piu\' del valore assoluto: un raddoppio '
-            'rispetto alla linea di base e\' un allarme anche in zona B.',
+        'La tendenza nel tempo conta più del valore assoluto: un raddoppio '
+            'rispetto alla linea di base è un allarme anche in zona B.',
       ],
     );
   }
@@ -803,7 +803,7 @@ class CilindroPneumatico extends Calculator {
     final dSt = i.num_('stelo');
     if (dSt >= dAl) {
       throw const CalcException(
-        'Lo stelo deve essere piu\' piccolo dell\'alesaggio.',
+        'Lo stelo deve essere più piccolo dell\'alesaggio.',
       );
     }
     final corsa = i.num_('corsa');
@@ -930,7 +930,7 @@ class CoefficienteKv extends Calculator {
     ),
     FieldSpec.number(
       'densita',
-      'Densita\' relativa',
+      'Densità relativa',
       min: 0.1,
       max: 20,
       value: 1,
@@ -963,7 +963,7 @@ class CoefficienteKv extends Calculator {
     return CalcResult(
       [
         ResultLine.number('Kv', kv, unit: 'm3/h', primary: true),
-        ResultLine.number('Cv (unita\' imperiali)', cv, decimals: 2),
+        ResultLine.number('Cv (unità imperiali)', cv, decimals: 2),
         ResultLine.number('Portata', q, unit: 'm3/h', primary: true),
         ResultLine.number('Portata', q / 3.6, unit: 'l/s', decimals: 3),
         ResultLine.number('Perdita di carico', dp, unit: 'bar', decimals: 3),
@@ -996,7 +996,7 @@ class TrasmissionePulegge extends Calculator {
   @override
   String get name => 'Trasmissione a pulegge';
   @override
-  String get subtitle => 'Rapporto, velocita\', lunghezza cinghia';
+  String get subtitle => 'Rapporto, velocità, lunghezza cinghia';
   @override
   Domain get domain => Domain.meccanico;
   @override
@@ -1008,7 +1008,7 @@ class TrasmissionePulegge extends Calculator {
   List<FieldSpec> get fields => const [
     FieldSpec.number(
       'n1',
-      'Velocita\' motrice',
+      'Velocità motrice',
       unit: 'rpm',
       min: 0.1,
       max: 30000,
@@ -1079,14 +1079,14 @@ class TrasmissionePulegge extends Calculator {
           primary: true,
         ),
         ResultLine.number(
-          'Velocita\' condotta',
+          'Velocità condotta',
           n2,
           unit: 'rpm',
           decimals: 1,
           primary: true,
         ),
         ResultLine.number(
-          'Velocita\' periferica',
+          'Velocità periferica',
           v,
           unit: 'm/s',
           severity: veloce ? Severity.warn : Severity.ok,
@@ -1130,7 +1130,7 @@ class PotenzaCoppiaVelocita extends Calculator {
   @override
   String get id => 'me.potenza_coppia';
   @override
-  String get name => 'Potenza, coppia, velocita\'';
+  String get name => 'Potenza, coppia, velocità';
   @override
   String get subtitle => 'Conversione tra le tre grandezze';
   @override
@@ -1146,7 +1146,7 @@ class PotenzaCoppiaVelocita extends Calculator {
       options: [
         SelectOption('c', 'Coppia'),
         SelectOption('p', 'Potenza'),
-        SelectOption('n', 'Velocita\''),
+        SelectOption('n', 'Velocità'),
       ],
       value: 'c',
     ),
@@ -1160,7 +1160,7 @@ class PotenzaCoppiaVelocita extends Calculator {
     ),
     FieldSpec.number(
       'n',
-      'Velocita\'',
+      'Velocità',
       unit: 'rpm',
       min: 0,
       max: 100000,
@@ -1192,7 +1192,7 @@ class PotenzaCoppiaVelocita extends Calculator {
 
     final incognita = i.opt('incognita');
     if (incognita == 'c') {
-      if (n <= 0) throw const CalcException('La velocita\' deve essere > 0.');
+      if (n <= 0) throw const CalcException('La velocità deve essere > 0.');
       c = 9550 * p / n;
     } else if (incognita == 'p') {
       p = c * n / 9550;
@@ -1207,19 +1207,8 @@ class PotenzaCoppiaVelocita extends Calculator {
     return CalcResult([
       ResultLine.number('Coppia', c, unit: 'Nm', primary: true),
       ResultLine.number('Potenza', p, unit: 'kW', decimals: 3, primary: true),
-      ResultLine.number(
-        'Velocita\'',
-        n,
-        unit: 'rpm',
-        decimals: 1,
-        primary: true,
-      ),
-      ResultLine.number(
-        'Velocita\' angolare',
-        omega,
-        unit: 'rad/s',
-        decimals: 3,
-      ),
+      ResultLine.number('Velocità', n, unit: 'rpm', decimals: 1, primary: true),
+      ResultLine.number('Velocità angolare', omega, unit: 'rad/s', decimals: 3),
       ResultLine.number('Potenza in cavalli', p * 1.35962, unit: 'CV'),
       if (eta < 1)
         ResultLine.number(

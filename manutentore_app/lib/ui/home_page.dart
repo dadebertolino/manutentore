@@ -125,7 +125,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _TitoloSheet('Modalita\''),
+              const _TitoloSheet('Modalità'),
               SegmentedButton<Modalita>(
                 segments: const [
                   ButtonSegment(
@@ -174,7 +174,7 @@ class _HomePageState extends State<HomePage> {
                 child: Text(
                   'Nessun account, nessuna rete, nessuna raccolta dati. '
                   'I calcoli danno un ordine di grandezza verificabile: non '
-                  'sostituiscono la norma ne\' il progetto firmato.',
+                  'sostituiscono la norma né il progetto firmato.',
                   style: TextStyle(
                     color: context.c.muted,
                     fontSize: 12,

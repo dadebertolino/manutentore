@@ -40,9 +40,9 @@ class CadutaDiTensione extends Calculator {
   List<String> get references => ['CEI 64-8/5 art. 525', 'CEI-UNEL 35023'];
   @override
   String? get theory =>
-      'La caduta e\' dovuta alla resistenza del conduttore e, sulle sezioni '
+      'La caduta è dovuta alla resistenza del conduttore e, sulle sezioni '
       'grandi, anche alla reattanza. Raddoppiare la lunghezza raddoppia la '
-      'caduta; raddoppiare la sezione la dimezza (finche\' domina la parte '
+      'caduta; raddoppiare la sezione la dimezza (finché domina la parte '
       'resistiva).';
 
   @override
@@ -179,7 +179,7 @@ class CadutaDiTensione extends Calculator {
       verdictSeverity: ok ? Severity.ok : Severity.fail,
       warnings: [
         if (s < 16 && i.num_('reatt') > 0)
-          'Sotto i 16 mm2 la reattanza e\' trascurabile: il contributo e\' minimo.',
+          'Sotto i 16 mm2 la reattanza è trascurabile: il contributo è minimo.',
       ],
     );
   }
@@ -329,7 +329,7 @@ class PortataCavo extends Calculator {
         if (nCirc > 1)
           'Il fattore di raggruppamento presuppone circuiti ugualmente caricati.',
         if (i.num_('tamb') > 40)
-          'Sopra i 40 C valutare EPR/XLPE o una posa piu\' ventilata.',
+          'Sopra i 40 C valutare EPR/XLPE o una posa più ventilata.',
       ],
     );
   }
@@ -619,10 +619,10 @@ class AnelloDiGuasto extends Calculator {
       ],
       verdict: ok
           ? 'Protezione garantita dal magnetotermico'
-          : 'Zs troppo alta: serve un differenziale o una linea piu\' corta',
+          : 'Zs troppo alta: serve un differenziale o una linea più corta',
       verdictSeverity: ok ? Severity.ok : Severity.fail,
       warnings: const [
-        'In sistema TT la protezione e\' affidata al differenziale: '
+        'In sistema TT la protezione è affidata al differenziale: '
             'verificare Ra x Idn <= 50 V.',
       ],
     );
@@ -650,7 +650,7 @@ class Rifasamento extends Calculator {
   @override
   String? get theory =>
       'I condensatori forniscono localmente la potenza reattiva che il carico '
-      'induttivo assorbe, cosi\' la rete trasporta solo la parte attiva: meno '
+      'induttivo assorbe, così la rete trasporta solo la parte attiva: meno '
       'corrente, meno perdite, meno penali.';
 
   @override
@@ -733,7 +733,7 @@ class Rifasamento extends Calculator {
           decimals: 1,
         ),
         ResultLine.number(
-          'Capacita\' per fase (triangolo, 50 Hz)',
+          'Capacità per fase (triangolo, 50 Hz)',
           cTri,
           unit: 'uF',
           decimals: 1,
@@ -775,8 +775,8 @@ class MotoreAsincrono extends Calculator {
   List<String> get references => ['IEC 60034-1', 'CEI EN 60947-4-1'];
   @override
   String? get theory =>
-      'La velocita\' di sincronismo dipende solo da frequenza e numero di poli. '
-      'Il rotore insegue sempre in ritardo: quel ritardo (scorrimento) e\' cio\' '
+      'La velocità di sincronismo dipende solo da frequenza e numero di poli. '
+      'Il rotore insegue sempre in ritardo: quel ritardo (scorrimento) è ciò '
       'che genera la coppia.';
 
   @override
@@ -823,7 +823,7 @@ class MotoreAsincrono extends Calculator {
     ),
     FieldSpec.number(
       'ngiri',
-      'Velocita\' di targa',
+      'Velocità di targa',
       unit: 'rpm',
       min: 1,
       max: 30000,
@@ -874,7 +874,7 @@ class MotoreAsincrono extends Calculator {
           primary: true,
         ),
         ResultLine.number(
-          'Velocita\' di sincronismo',
+          'Velocità di sincronismo',
           ns,
           unit: 'rpm',
           decimals: 0,
@@ -908,7 +908,7 @@ class MotoreAsincrono extends Calculator {
       warnings: [
         if (sSospetto)
           'Scorrimento fuori dal range tipico (1-8%): controllare il numero '
-              'di poli o la velocita\' di targa.',
+              'di poli o la velocità di targa.',
       ],
     );
   }
@@ -984,7 +984,7 @@ class SegnaleAnalogico extends Calculator {
     final pvMin = i.num_('pvMin');
     final pvMax = i.num_('pvMax');
     if (pvMax == pvMin) {
-      throw const CalcException('Il fondo scala non puo\' essere nullo.');
+      throw const CalcException('Il fondo scala non può essere nullo.');
     }
     final val = i.num_('val');
     final bit = i.int_('bit');
@@ -1152,7 +1152,7 @@ class TermoresistenzaPt extends Calculator {
       warnings: [
         if (rCavo > 0 && verso == 'r2t')
           'Passare a 3 o 4 fili elimina l\'errore di linea.',
-        if (t < -200 || t > 850) 'Fuori dal campo di validita\' IEC 60751.',
+        if (t < -200 || t > 850) 'Fuori dal campo di validità IEC 60751.',
       ],
     );
   }

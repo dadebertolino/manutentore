@@ -57,7 +57,7 @@ class CronologiaPage extends StatelessWidget {
         title: const Text('Svuotare la cronologia?'),
         content: const Text(
           'Le voci salvate su questo telefono vengono cancellate. '
-          'Non si puo\' annullare.',
+          'Non si può annullare.',
         ),
         actions: [
           TextButton(
@@ -91,7 +91,7 @@ class _Voce extends StatelessWidget {
     if (calc == null) {
       return ListTile(
         title: Text(
-          'Calcolatore non piu\' disponibile',
+          'Calcolatore non più disponibile',
           style: TextStyle(color: c.muted),
         ),
         subtitle: Text(

@@ -219,8 +219,19 @@ aggiornare sia lo script sia questa sezione.
 
 - **Lingua**: identificatori, commenti, stringhe UI e messaggi d'errore in
   italiano. Le sigle tecniche restano in originale (`Iz`, `BPFO`, `Kv`, `L10h`).
-  Nei file del core evita accenti nei commenti e usa l'apostrofo per le vocali
-  accentate nelle stringhe (`velocita\'`), come già fatto.
+- **Accenti: dipende da chi legge.** La regola non è più "apostrofo ovunque".
+  - **Stringhe che finiscono a schermo** — `name`, `subtitle`, `label`, `unit`,
+    `help`, `theory`, verdetti, `CalcException` — vogliono **l'accento vero**:
+    `Severità`, `Velocità`, `più`, `è`, `perché`. Il sorgente Dart è UTF-8 e
+    non ha mai avuto problemi con questi caratteri: l'apostrofo era un
+    espediente di quando il codice si scriveva senza compilatore, e a schermo
+    si legge come una svista — su uno strumento che si presenta come una targa
+    dati, `Severita'` toglie credibilità al numero che c'è sotto.
+  - **Commenti e identificatori** restano senza accenti, in ASCII.
+  - Attenzione a non confondere l'accento con l'apostrofo vero: `l\'utente`,
+    `dell\'albero`, `d\'aria` restano escape e non si toccano.
+  - `Registro.cerca()` normalizza via accenti, quindi cercare `velocita`
+    continua a trovare `Velocità`. È coperto da test.
 - **`Calculator.id` è immutabile**: è la chiave di preferiti, cronologia e
   futuri deep link. Rinominarlo rompe i dati degli utenti.
 - **Errori d'uso → `CalcException`** con messaggio rivolto all'utente, in
