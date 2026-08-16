@@ -25,7 +25,7 @@ const kSezioni = <double>[
 ];
 
 /// Portate Iz0 in aria a 30 C, conduttori in rame.
-/// Chiave: '<isolante>|<posa>|<n conduttori attivi>'.
+/// Chiave: `'<isolante>|<posa>|<n conduttori attivi>'`.
 /// Rif. IEC 60364-5-52 / CEI-UNEL 35024-1.
 final kPortateCu = <String, Map<double, double>>{
   'PVC|B1|2': {
