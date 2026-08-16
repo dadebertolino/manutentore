@@ -42,6 +42,10 @@ manutentore/
     ├── assets/fonts/      IBM Plex Sans e Mono (OFL), 5 pesi
     ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
     └── test/              15 test: UI, cronologia, persistenza input
+
+design/                    Sorgenti SVG dell'icona
+tool/                      verifica_privacy.sh, genera_icone.sh
+.github/workflows/ci.yml   Formato, analisi, test, deny-list tracciamento
 ```
 
 I due package sono **cartelle sorelle**. `manutentore_app/pubspec.yaml`
@@ -168,6 +172,24 @@ cuscinetto: l'artefatto che il manutentore già sa leggere.
   il sole, non è il caso principale.
 - **Raggio 6 px**, non pillole. È una targa, non un bottone di un social.
 
+### Icona — fatta
+Esagono (testa di vite: il meccanico) con **Ω ritagliata** dentro (l'elettrico),
+in giallo sicurezza su targa scura. Sorgente in `design/icona.svg`, con l'Ω già
+convertita in tracciato: rigenerare non richiede i font.
+
+**I PNG non si toccano a mano**: si rifanno tutti — 15 misure iOS, 5 densità
+Android in versione classica e adattiva — con `./tool/genera_icone.sh`, che è
+deterministico (usa `-strip`, altrimenti ImageMagick scrive la data dentro il
+PNG e ogni rigenerazione sporca il diff).
+
+Due vincoli di piattaforma incorporati nello script: le icone iOS **non possono
+avere il canale alfa**, e il primo piano dell'icona adattiva Android deve stare
+nel 66% centrale della tela perché il resto lo maschera il launcher. La sagoma
+occupa il 57,8%.
+
+Il nome sulla schermata home è **"Breviario"** su entrambe le piattaforme —
+"Breviario del manutentore" verrebbe troncato.
+
 ### Font — fatti
 **IBM Plex Sans** e **IBM Plex Mono** sono in `assets/fonts/`, self-hosted e
 mai da CDN (§5), con la licenza OFL accanto in `OFL.txt`. Scaricati dalle
@@ -288,9 +310,9 @@ aggiornare sia lo script sia questa sezione.
    Davide prima di implementare.
 
 ### Pubblicare
-6. Icona, splash, screenshot **senza dati reali**, testi store con
-   inquadramento adulto, privacy policy su davidebertolino.it, README con
-   sezione privacy.
+6. Splash, screenshot **senza dati reali**, testi store con inquadramento
+   adulto, privacy policy su davidebertolino.it. Icona e sezione privacy del
+   README sono fatte.
 
 ---
 
