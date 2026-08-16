@@ -5,6 +5,7 @@ import '../state/impostazioni.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'calcolatore_page.dart';
+import 'cronologia_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -42,6 +43,13 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Breviario'),
         actions: [
+          IconButton(
+            tooltip: 'Cronologia',
+            icon: const Icon(Icons.history),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const CronologiaPage()),
+            ),
+          ),
           IconButton(
             tooltip: 'Impostazioni',
             icon: const Icon(Icons.tune),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:manutentore/app.dart';
+import 'package:manutentore/state/cronologia.dart';
 import 'package:manutentore/state/impostazioni.dart';
 import 'package:manutentore_core/manutentore_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,11 +14,14 @@ final listaHome = find.descendant(
   matching: find.byType(Scrollable),
 );
 
-Future<void> avvia(WidgetTester tester) async {
+/// Avvia la app e restituisce la cronologia, per poterla ispezionare nei test.
+Future<Cronologia> avvia(WidgetTester tester) async {
   SharedPreferences.setMockInitialValues({});
   final imp = await Impostazioni.carica();
-  await tester.pumpWidget(BreviarioApp(impostazioni: imp));
+  final cron = await Cronologia.carica();
+  await tester.pumpWidget(BreviarioApp(impostazioni: imp, cronologia: cron));
   await tester.pumpAndSettle();
+  return cron;
 }
 
 void main() {
@@ -77,5 +81,132 @@ void main() {
         reason: c.id,
       );
     }
+  });
+
+  group('cronologia', () {
+    testWidgets('un calcolo modificato finisce in cronologia all\'uscita', (
+      tester,
+    ) async {
+      final cron = await avvia(tester);
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Lunghezza linea'),
+        '75',
+      );
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      expect(cron.voci, hasLength(1));
+      expect(cron.voci.first.calcId, 'el.caduta_tensione');
+      expect(cron.voci.first.valori['lung'], 75);
+    });
+
+    testWidgets('aprire e uscire senza toccare niente non registra nulla', (
+      tester,
+    ) async {
+      final cron = await avvia(tester);
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      expect(cron.voci, isEmpty);
+    });
+
+    testWidgets('una voce riapre il calcolatore con i suoi input', (
+      tester,
+    ) async {
+      await avvia(tester);
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Lunghezza linea'),
+        '75',
+      );
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Cronologia'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+
+      final campo = tester.widget<TextField>(
+        find.widgetWithText(TextField, 'Lunghezza linea'),
+      );
+      expect(campo.controller?.text, '75');
+    });
+
+    test('lo stesso calcolo non occupa due posizioni', () async {
+      SharedPreferences.setMockInitialValues({});
+      final cron = await Cronologia.carica();
+      VoceCronologia voce(int lung, DateTime t) => VoceCronologia(
+        calcId: 'el.caduta_tensione',
+        valori: {'lung': lung},
+        quando: t,
+      );
+      final t0 = DateTime(2026, 1, 1);
+      cron.registra(voce(45, t0));
+      cron.registra(voce(75, t0.add(const Duration(minutes: 1))));
+      cron.registra(voce(45, t0.add(const Duration(minutes: 2))));
+
+      expect(cron.voci, hasLength(2));
+      // Il piu' recente e' in cima, anche se era gia' stato fatto prima.
+      expect(cron.voci.first.valori['lung'], 45);
+    });
+
+    test('oltre il massimo cadono le voci piu\' vecchie', () async {
+      SharedPreferences.setMockInitialValues({});
+      final cron = await Cronologia.carica();
+      for (var i = 0; i < Cronologia.massimo + 10; i++) {
+        cron.registra(
+          VoceCronologia(
+            calcId: 'el.caduta_tensione',
+            valori: {'lung': i},
+            quando: DateTime(2026, 1, 1).add(Duration(minutes: i)),
+          ),
+        );
+      }
+      expect(cron.voci, hasLength(Cronologia.massimo));
+      expect(cron.voci.first.valori['lung'], Cronologia.massimo + 9);
+    });
+
+    test('le voci sopravvivono a un riavvio', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prima = await Cronologia.carica();
+      prima.registra(
+        VoceCronologia(
+          calcId: 'me.coppia_serraggio',
+          valori: const {'d': 12.0, 'classe': '8.8', 'lubrificato': true},
+          quando: DateTime(2026, 1, 1),
+          sintesi: 'Coppia: 90 Nm',
+        ),
+      );
+
+      final dopo = await Cronologia.carica();
+      expect(dopo.voci, hasLength(1));
+      final v = dopo.voci.first;
+      expect(v.calcId, 'me.coppia_serraggio');
+      expect(v.valori['d'], 12.0);
+      expect(v.valori['classe'], '8.8');
+      expect(v.valori['lubrificato'], true);
+      expect(v.sintesi, 'Coppia: 90 Nm');
+    });
+
+    test('una voce illeggibile non impedisce di leggere le altre', () async {
+      SharedPreferences.setMockInitialValues({
+        'cronologia': <String>[
+          'non e\' json',
+          '{"id":"el.caduta_tensione","v":{"lung":45},"t":1767225600000}',
+          '{"manca":"tutto"}',
+        ],
+      });
+      final cron = await Cronologia.carica();
+      expect(cron.voci, hasLength(1));
+      expect(cron.voci.first.calcId, 'el.caduta_tensione');
+    });
   });
 }

@@ -37,10 +37,11 @@ manutentore/
 └── manutentore_app/       App Flutter — SCHELETRO FUNZIONANTE
     ├── lib/theme/         Token e temi chiaro/scuro
     ├── lib/state/         impostazioni.dart: modalità, tema, preferiti
-    │                      (ChangeNotifier + prefs, un file solo)
-    ├── lib/ui/            Home, schermata di calcolo generica, widget
+    │                      cronologia.dart:  ultimi 50 calcoli + input
+    ├── lib/ui/            Home, calcolo generico, cronologia, widget
+    ├── assets/fonts/      IBM Plex Sans e Mono (OFL), 5 pesi
     ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
-    └── test/              5 test di superficie sulla UI
+    └── test/              12 test: UI di superficie + cronologia
 ```
 
 I due package sono **cartelle sorelle**. `manutentore_app/pubspec.yaml`
@@ -57,7 +58,7 @@ Stato verificato il 2026-08-16:
 | package | `analyze` | test |
 |---|---|---|
 | `manutentore_core` | pulito | 36 passati |
-| `manutentore_app`  | pulito | 5 passati |
+| `manutentore_app`  | pulito | 12 passati |
 
 ```bash
 cd manutentore_core && dart pub get && dart analyze && dart test
@@ -102,8 +103,25 @@ di tracciamento.
 
 ### Niente state management di terze parti
 
-`ChangeNotifier` + `InheritedNotifier` bastano per modalità, tema e preferiti.
-Ogni pacchetto in più è un pacchetto da giustificare (vedi §5).
+`ChangeNotifier` + `InheritedNotifier` bastano per modalità, tema, preferiti e
+cronologia. Ogni pacchetto in più è un pacchetto da giustificare (vedi §5).
+
+### Cronologia
+
+`Cronologia` (in `state/cronologia.dart`) tiene gli ultimi 50 calcoli con gli
+input che li hanno prodotti, in prefs come JSON. Tre scelte da conoscere prima
+di toccarla:
+
+- **Si registra all'uscita dalla schermata, non a ogni battuta.** Si ricalcola
+  a ogni carattere digitato: salvare ogni passaggio riempirebbe le 50 posizioni
+  con gli stati intermedi di un numero solo. Aprire un calcolatore e uscirne
+  senza toccare niente non registra nulla.
+- **Stesso calcolo con stessi input non occupa due posizioni**: risale in cima.
+  È una lista di *cose da cui ripartire*, non un registro cronologico.
+- **Serve a ripristinare gli input**, non a rileggere il risultato:
+  `CalcolatorePage` accetta `valoriIniziali`. Le chiavi che il calcolatore non
+  conosce più vengono ignorate, così una voce vecchia non trascina campi
+  orfani.
 
 ### Modalità studente / professionista
 
@@ -224,27 +242,25 @@ aggiornare sia lo script sia questa sezione.
 ## 7. Backlog, in ordine
 
 ### Rendere usabile in campo
-1. **Cronologia dei calcoli**: ultimi 50, locale, con ripristino degli input.
-   Stesso pattern di `preferiti` in `Impostazioni`.
-2. **Persistenza degli input per calcolatore**: riaprendo un calcolatore
+1. **Persistenza degli input per calcolatore**: riaprendo un calcolatore
    ritrova gli ultimi valori usati. In campo si rifà lo stesso calcolo con una
    variabile diversa.
-3. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
+2. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
    share sheet (mai upload). È la funzione che fa scaricare l'app a chi lavora
    davvero. Valuta `pdf` + `printing` — sono da approvare come dipendenze.
-4. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
+3. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
    supporto al text scaling fino a 200% senza overflow nella `TargaRisultato`.
 
 ### Crescere in contenuto
-5. **Altri calcolatori**: sezione da corrente di corto, resistenza di
+4. **Altri calcolatori**: sezione da corrente di corto, resistenza di
    isolamento, termocoppie K/J, ISO VG e compatibilità grassi, allineamento
    alberi, tolleranze ISO H7/g6, perdite di carico nelle tubazioni, MTBF/MTTR
    e OEE.
-6. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
+5. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
    ISO 1219, codici colore, classi IP/IK, coppie di serraggio a colpo d'occhio.
    Serve un nuovo tipo di scheda nel registro — progettalo, non forzarlo dentro
    `Calculator`.
-7. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
+6. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
    all'avviamento"*, *"cuscinetto rumoroso"*: sequenze di verifiche dove
    l'esito determina il passo successivo. È la parte con più valore didattico
    e la meno banale da modellare: **serve un modello dati nuovo** (nodo,
@@ -252,7 +268,7 @@ aggiornare sia lo script sia questa sezione.
    Davide prima di implementare.
 
 ### Pubblicare
-8. Icona, splash, screenshot **senza dati reali**, testi store con
+7. Icona, splash, screenshot **senza dati reali**, testi store con
    inquadramento adulto, privacy policy su davidebertolino.it, README con
    sezione privacy.
 
@@ -272,6 +288,17 @@ aggiornare sia lo script sia questa sezione.
   campo, aggiorna il calcolo, non solo l'avviso.
 - **La verifica adiabatica I²t** assume tempo di intervento noto e costante.
   Non è la curva reale dell'interruttore. Non promettere selettività.
+- **I campi numerici emettono `String`, non `num`.** `CampoInput` passa il
+  testo grezzo, e `Inputs.num_` lo sa leggere — per cui i calcoli funzionano e
+  la cosa non si nota. Si nota quando quei valori vanno *altrove*:
+  `_formatoIniziale` mostra solo i `num`, quindi la cronologia normalizza a
+  numero prima di salvare, altrimenti al ripristino i campi tornerebbero vuoti.
+  Se aggiungi una feature che rilegge `_valori`, ricordatene.
+- **Non chiamare `notifyListeners()` dentro `dispose()`.** L'albero è bloccato
+  durante lo smontaggio e Flutter lancia *"markNeedsBuild called when widget
+  tree was locked"*. La cronologia registra proprio lì, quindi rimanda la
+  notifica con `scheduleMicrotask`: lo stato cambia subito, la notifica aspetta
+  la fine dello smontaggio.
 - **Disclaimer**: la app dà un ordine di grandezza verificabile, non sostituisce
   la norma né il progetto firmato da un tecnico abilitato. Va detto **una
   volta**, in impostazioni (già presente) — non a ogni schermata, o smette di

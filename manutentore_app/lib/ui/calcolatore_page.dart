@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:manutentore_core/manutentore_core.dart';
 
+import '../state/cronologia.dart';
 import '../state/impostazioni.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -14,9 +15,17 @@ import 'widgets/targa_risultato.dart';
 /// e ricalcola a ogni battuta. Aggiungere un calcolatore al registro lo rende
 /// disponibile qui senza toccare una riga di UI.
 class CalcolatorePage extends StatefulWidget {
-  const CalcolatorePage({required this.calcolatore, super.key});
+  const CalcolatorePage({
+    required this.calcolatore,
+    this.valoriIniziali,
+    super.key,
+  });
 
   final Calculator calcolatore;
+
+  /// Input da cui ripartire, quando si arriva dalla cronologia. Null significa
+  /// "usa i default delle [FieldSpec]".
+  final Map<String, Object?>? valoriIniziali;
 
   @override
   State<CalcolatorePage> createState() => _CalcolatorePageState();
@@ -26,28 +35,97 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
   late final Map<String, Object?> _valori;
   late final Map<String, TextEditingController> _controller;
 
+  /// Presa in `didChangeDependencies`: in `dispose` il context non e' piu'
+  /// interrogabile, ma e' li' che sappiamo che il calcolo e' finito.
+  Cronologia? _cronologia;
+
   CalcResult? _risultato;
   String? _errore;
 
   @override
   void initState() {
     super.initState();
-    _valori = {for (final f in widget.calcolatore.fields) f.key: f.initial};
+    final iniziali = widget.valoriIniziali;
+    _valori = {
+      for (final f in widget.calcolatore.fields)
+        // Solo le chiavi che il calcolatore conosce ancora: una voce di
+        // cronologia salvata prima che un campo cambiasse nome non deve
+        // trascinarsi dietro valori orfani.
+        f.key: iniziali != null && iniziali.containsKey(f.key)
+            ? iniziali[f.key]
+            : f.initial,
+    };
     _controller = {
       for (final f in widget.calcolatore.fields)
         if (f.type == FieldType.number)
-          f.key: TextEditingController(text: _formatoIniziale(f.initial)),
+          f.key: TextEditingController(text: _formatoIniziale(_valori[f.key])),
     };
     _ricalcola();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _cronologia = CronologiaScope.of(context);
+  }
+
+  @override
   void dispose() {
+    _registraInCronologia();
     for (final c in _controller.values) {
       c.dispose();
     }
     super.dispose();
   }
+
+  /// Registra il calcolo quando si lascia la schermata.
+  ///
+  /// Non a ogni battuta: si ricalcola a ogni carattere digitato, e salvare
+  /// ogni passaggio riempirebbe le 50 posizioni con gli stati intermedi di un
+  /// solo numero. Uscire dalla schermata e' il momento in cui il calcolo e'
+  /// quello che l'utente voleva.
+  void _registraInCronologia() {
+    final r = _risultato;
+    final cronologia = _cronologia;
+    if (r == null || cronologia == null) return;
+    // Aprire un calcolatore e uscirne senza toccare niente non e' un calcolo.
+    if (_valoriSonoIDefault()) return;
+    final primaria = r.lines.firstWhere(
+      (l) => l.primary,
+      orElse: () =>
+          r.lines.isNotEmpty ? r.lines.first : const ResultLine('', ''),
+    );
+    cronologia.registra(
+      VoceCronologia(
+        calcId: widget.calcolatore.id,
+        valori: _valoriNormalizzati(),
+        quando: DateTime.now(),
+        sintesi: primaria.label.isEmpty ? r.verdict : primaria.toString(),
+      ),
+    );
+  }
+
+  /// I campi numerici arrivano dalla tastiera come stringhe: `Inputs` le sa
+  /// leggere, ma in cronologia vanno messe via come numeri.
+  ///
+  /// Senza questa conversione la stessa combinazione digitata a mano o
+  /// lasciata al default sembrerebbe due calcoli diversi, e al ripristino il
+  /// campo tornerebbe vuoto, perche' [_formatoIniziale] mostra solo i `num`.
+  Map<String, Object?> _valoriNormalizzati() {
+    final out = <String, Object?>{};
+    for (final f in widget.calcolatore.fields) {
+      final v = _valori[f.key];
+      if (f.type == FieldType.number && v is String) {
+        out[f.key] = double.tryParse(v.trim().replaceAll(',', '.')) ?? v;
+      } else {
+        out[f.key] = v;
+      }
+    }
+    return out;
+  }
+
+  bool _valoriSonoIDefault() =>
+      widget.calcolatore.fields.every((f) => _valori[f.key] == f.initial);
 
   static String _formatoIniziale(Object? v) {
     if (v is! num) return '';
