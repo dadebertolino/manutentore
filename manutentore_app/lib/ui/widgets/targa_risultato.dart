@@ -70,11 +70,11 @@ class TargaRisultato extends StatelessWidget {
 }
 
 Color coloreSeverita(BuildContext context, Severity s) => switch (s) {
-      Severity.ok => context.c.ok,
-      Severity.warn => context.c.warn,
-      Severity.fail => context.c.fail,
-      Severity.neutral => context.c.muted,
-    };
+  Severity.ok => context.c.ok,
+  Severity.warn => context.c.warn,
+  Severity.fail => context.c.fail,
+  Severity.neutral => context.c.muted,
+};
 
 class _BandaVerdetto extends StatelessWidget {
   const _BandaVerdetto({required this.testo, required this.severita});

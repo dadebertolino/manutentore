@@ -32,9 +32,7 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
   @override
   void initState() {
     super.initState();
-    _valori = {
-      for (final f in widget.calcolatore.fields) f.key: f.initial,
-    };
+    _valori = {for (final f in widget.calcolatore.fields) f.key: f.initial};
     _controller = {
       for (final f in widget.calcolatore.fields)
         if (f.type == FieldType.number)
@@ -106,9 +104,9 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
     }
     if (r.verdict != null) buffer.writeln('\n${r.verdict}');
     Clipboard.setData(ClipboardData(text: buffer.toString()));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Calcolo copiato')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Calcolo copiato')));
   }
 
   @override

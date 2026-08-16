@@ -28,8 +28,11 @@ void main() {
     expect(find.text('Caduta di tensione'), findsOneWidget);
     // La lista e' pigra: la sezione meccanica non esiste finche' non ci si
     // scrolla sopra.
-    await tester.scrollUntilVisible(find.text('MECCANICO'), 300,
-        scrollable: listaHome);
+    await tester.scrollUntilVisible(
+      find.text('MECCANICO'),
+      300,
+      scrollable: listaHome,
+    );
     expect(find.text('MECCANICO'), findsOneWidget);
   });
 
@@ -41,19 +44,22 @@ void main() {
     expect(find.text('Caduta di tensione'), findsNothing);
   });
 
-  testWidgets('aprire un calcolatore mostra subito un risultato',
-      (tester) async {
+  testWidgets('aprire un calcolatore mostra subito un risultato', (
+    tester,
+  ) async {
     await avvia(tester);
-    await tester.scrollUntilVisible(find.text('Coppia di serraggio'), 300,
-        scrollable: listaHome);
+    await tester.scrollUntilVisible(
+      find.text('Coppia di serraggio'),
+      300,
+      scrollable: listaHome,
+    );
     await tester.tap(find.text('Coppia di serraggio'));
     await tester.pumpAndSettle();
     // I default calcolano senza che l'utente tocchi nulla.
     expect(find.textContaining('90'), findsWidgets);
   });
 
-  testWidgets('un input non valido mostra un errore leggibile',
-      (tester) async {
+  testWidgets('un input non valido mostra un errore leggibile', (tester) async {
     await avvia(tester);
     await tester.tap(find.text('Caduta di tensione'));
     await tester.pumpAndSettle();
@@ -65,8 +71,11 @@ void main() {
 
   test('ogni calcolatore del registro e\' apribile senza eccezioni', () {
     for (final c in Registro.tutti) {
-      expect(() => c.compute(Inputs.defaults(c.fields)), returnsNormally,
-          reason: c.id);
+      expect(
+        () => c.compute(Inputs.defaults(c.fields)),
+        returnsNormally,
+        reason: c.id,
+      );
     }
   });
 }

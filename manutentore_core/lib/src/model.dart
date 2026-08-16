@@ -40,9 +40,9 @@ class FieldSpec {
     this.max,
     double? value,
     this.help,
-  })  : type = FieldType.number,
-        options = const [],
-        initial = value;
+  }) : type = FieldType.number,
+       options = const [],
+       initial = value;
 
   const FieldSpec.select(
     this.key,
@@ -50,23 +50,19 @@ class FieldSpec {
     required this.options,
     String? value,
     this.help,
-  })  : type = FieldType.select,
-        unit = '',
-        min = null,
-        max = null,
-        initial = value;
+  }) : type = FieldType.select,
+       unit = '',
+       min = null,
+       max = null,
+       initial = value;
 
-  const FieldSpec.toggle(
-    this.key,
-    this.label, {
-    bool value = false,
-    this.help,
-  })  : type = FieldType.toggle,
-        unit = '',
-        min = null,
-        max = null,
-        options = const [],
-        initial = value;
+  const FieldSpec.toggle(this.key, this.label, {bool value = false, this.help})
+    : type = FieldType.toggle,
+      unit = '',
+      min = null,
+      max = null,
+      options = const [],
+      initial = value;
 }
 
 /// Errore di calcolo con messaggio destinato all'utente finale.
@@ -83,13 +79,11 @@ class Inputs {
   final Map<String, FieldSpec> _specs;
 
   Inputs(this._raw, List<FieldSpec> fields)
-      : _specs = {for (final f in fields) f.key: f};
+    : _specs = {for (final f in fields) f.key: f};
 
   /// Costruisce gli input di default a partire dalle specifiche.
-  static Inputs defaults(List<FieldSpec> fields) => Inputs(
-        {for (final f in fields) f.key: f.initial},
-        fields,
-      );
+  static Inputs defaults(List<FieldSpec> fields) =>
+      Inputs({for (final f in fields) f.key: f.initial}, fields);
 
   double num_(String key) {
     final spec = _specs[key];
@@ -129,7 +123,9 @@ class Inputs {
     final spec = _specs[key];
     final init = spec?.initial;
     if (init is String) return init;
-    if (spec != null && spec.options.isNotEmpty) return spec.options.first.value;
+    if (spec != null && spec.options.isNotEmpty) {
+      return spec.options.first.value;
+    }
     throw CalcException('Selezione mancante per "${spec?.label ?? key}".');
   }
 
@@ -185,15 +181,14 @@ class ResultLine {
     Severity severity = Severity.neutral,
     String? note,
     bool primary = false,
-  }) =>
-      ResultLine(
-        label,
-        _fmt(value, decimals),
-        unit: unit,
-        severity: severity,
-        note: note,
-        primary: primary,
-      );
+  }) => ResultLine(
+    label,
+    _fmt(value, decimals),
+    unit: unit,
+    severity: severity,
+    note: note,
+    primary: primary,
+  );
 
   @override
   String toString() => '$label: $value $unit'.trim();
@@ -218,9 +213,9 @@ class CalcResult {
 
   /// Recupera una riga per etichetta (usato dai test).
   ResultLine line(String label) => lines.firstWhere(
-        (l) => l.label == label,
-        orElse: () => throw StateError('Riga "$label" assente'),
-      );
+    (l) => l.label == label,
+    orElse: () => throw StateError('Riga "$label" assente'),
+  );
 
   double numeric(String label) =>
       double.parse(line(label).value.replaceAll(',', '.'));

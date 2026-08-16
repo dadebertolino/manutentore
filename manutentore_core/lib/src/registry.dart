@@ -30,9 +30,9 @@ class Registro {
   ];
 
   static Calculator byId(String id) => tutti.firstWhere(
-        (c) => c.id == id,
-        orElse: () => throw ArgumentError('Calcolatore "$id" non registrato'),
-      );
+    (c) => c.id == id,
+    orElse: () => throw ArgumentError('Calcolatore "$id" non registrato'),
+  );
 
   static List<Calculator> byDomain(Domain d) =>
       tutti.where((c) => c.domain == d).toList();

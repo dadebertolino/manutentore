@@ -50,6 +50,8 @@ jobs:
         with:
           sdk: ${{ env.DART_VERSION }}
       - run: dart pub get
+      - name: Formattazione
+        run: dart format --output=none --set-exit-if-changed .
       - name: Analisi
         run: dart analyze --fatal-infos .
       - name: Test
@@ -80,6 +82,8 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Formattazione
+        run: dart format --output=none --set-exit-if-changed .
       - name: Analisi
         run: flutter analyze --fatal-infos
       - name: Test

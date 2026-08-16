@@ -29,15 +29,14 @@ class Sfumature extends ThemeExtension<Sfumature> {
     Color? ok,
     Color? warn,
     Color? fail,
-  }) =>
-      Sfumature(
-        plate: plate ?? this.plate,
-        line: line ?? this.line,
-        muted: muted ?? this.muted,
-        ok: ok ?? this.ok,
-        warn: warn ?? this.warn,
-        fail: fail ?? this.fail,
-      );
+  }) => Sfumature(
+    plate: plate ?? this.plate,
+    line: line ?? this.line,
+    muted: muted ?? this.muted,
+    ok: ok ?? this.ok,
+    warn: warn ?? this.warn,
+    fail: fail ?? this.fail,
+  );
 
   @override
   Sfumature lerp(covariant Sfumature? other, double t) {
@@ -58,24 +57,24 @@ extension SfumatureContext on BuildContext {
 }
 
 ThemeData temaScuro() => _tema(
-      brightness: Brightness.dark,
-      ground: T.groundDark,
-      surface: T.surfaceDark,
-      plate: T.plateDark,
-      line: T.lineDark,
-      text: T.textDark,
-      muted: T.mutedDark,
-    );
+  brightness: Brightness.dark,
+  ground: T.groundDark,
+  surface: T.surfaceDark,
+  plate: T.plateDark,
+  line: T.lineDark,
+  text: T.textDark,
+  muted: T.mutedDark,
+);
 
 ThemeData temaChiaro() => _tema(
-      brightness: Brightness.light,
-      ground: T.groundLight,
-      surface: T.surfaceLight,
-      plate: T.plateLight,
-      line: T.lineLight,
-      text: T.textLight,
-      muted: T.mutedLight,
-    );
+  brightness: Brightness.light,
+  ground: T.groundLight,
+  surface: T.surfaceLight,
+  plate: T.plateLight,
+  line: T.lineLight,
+  text: T.textLight,
+  muted: T.mutedLight,
+);
 
 ThemeData _tema({
   required Brightness brightness,
@@ -157,10 +156,7 @@ ThemeData _tema({
       helperStyle: TextStyle(color: muted, fontSize: 12),
       helperMaxLines: 3,
     ),
-    textTheme: base.textTheme.apply(
-      bodyColor: text,
-      displayColor: text,
-    ),
+    textTheme: base.textTheme.apply(bodyColor: text, displayColor: text),
     listTileTheme: ListTileThemeData(iconColor: muted),
   );
 }

@@ -14,9 +14,9 @@ enum PreferenzaTema { sistema, chiaro, scuro }
 /// una dipendenza in meno da giustificare.
 class Impostazioni extends ChangeNotifier {
   Impostazioni(this._prefs)
-      : _modalita = _leggiModalita(_prefs),
-        _tema = _leggiTema(_prefs),
-        _preferiti = _prefs.getStringList(_kPreferiti)?.toSet() ?? <String>{};
+    : _modalita = _leggiModalita(_prefs),
+      _tema = _leggiTema(_prefs),
+      _preferiti = _prefs.getStringList(_kPreferiti)?.toSet() ?? <String>{};
 
   static const _kModalita = 'modalita';
   static const _kTema = 'tema';
@@ -57,8 +57,8 @@ class Impostazioni extends ChangeNotifier {
     notifyListeners();
   }
 
-  static Modalita _leggiModalita(SharedPreferences p) => Modalita.values
-      .firstWhere(
+  static Modalita _leggiModalita(SharedPreferences p) =>
+      Modalita.values.firstWhere(
         (m) => m.name == p.getString(_kModalita),
         orElse: () => Modalita.professionista,
       );
@@ -78,9 +78,12 @@ class ImpostazioniScope extends InheritedNotifier<Impostazioni> {
   });
 
   static Impostazioni of(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<ImpostazioniScope>();
-    assert(scope?.notifier != null, 'ImpostazioniScope assente sopra a questo widget');
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<ImpostazioniScope>();
+    assert(
+      scope?.notifier != null,
+      'ImpostazioniScope assente sopra a questo widget',
+    );
     return scope!.notifier!;
   }
 }

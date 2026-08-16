@@ -47,29 +47,74 @@ class CadutaDiTensione extends Calculator {
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.select('sistema', 'Sistema',
-            options: _optSistema, value: 'tri'),
-        FieldSpec.number('un', 'Tensione nominale',
-            unit: 'V', min: 1, max: 1000, value: 400),
-        FieldSpec.number('ib', 'Corrente di impiego',
-            unit: 'A', min: 0.01, max: 2000, value: 32),
-        FieldSpec.number('lung', 'Lunghezza linea',
-            unit: 'm', min: 0.1, max: 5000, value: 45),
-        FieldSpec.number('sez', 'Sezione conduttore',
-            unit: 'mm2', min: 0.5, max: 630, value: 10),
-        FieldSpec.select('mat', 'Materiale',
-            options: _optMateriale, value: 'Cu'),
-        FieldSpec.number('cosphi', 'Fattore di potenza',
-            min: 0.1, max: 1, value: 0.9),
-        FieldSpec.number('temp', 'Temperatura conduttore',
-            unit: 'C', min: 20, max: 120, value: 70,
-            help: '70 C per PVC, 90 C per EPR/XLPE a pieno carico.'),
-        FieldSpec.number('reatt', 'Reattanza specifica',
-            unit: 'mohm/m', min: 0, max: 1, value: 0.08,
-            help: 'Trascurabile sotto i 16 mm2. Cavi multipolari ~0,08.'),
-        FieldSpec.number('limite', 'Limite ammesso',
-            unit: '%', min: 0.5, max: 20, value: 4),
-      ];
+    FieldSpec.select('sistema', 'Sistema', options: _optSistema, value: 'tri'),
+    FieldSpec.number(
+      'un',
+      'Tensione nominale',
+      unit: 'V',
+      min: 1,
+      max: 1000,
+      value: 400,
+    ),
+    FieldSpec.number(
+      'ib',
+      'Corrente di impiego',
+      unit: 'A',
+      min: 0.01,
+      max: 2000,
+      value: 32,
+    ),
+    FieldSpec.number(
+      'lung',
+      'Lunghezza linea',
+      unit: 'm',
+      min: 0.1,
+      max: 5000,
+      value: 45,
+    ),
+    FieldSpec.number(
+      'sez',
+      'Sezione conduttore',
+      unit: 'mm2',
+      min: 0.5,
+      max: 630,
+      value: 10,
+    ),
+    FieldSpec.select('mat', 'Materiale', options: _optMateriale, value: 'Cu'),
+    FieldSpec.number(
+      'cosphi',
+      'Fattore di potenza',
+      min: 0.1,
+      max: 1,
+      value: 0.9,
+    ),
+    FieldSpec.number(
+      'temp',
+      'Temperatura conduttore',
+      unit: 'C',
+      min: 20,
+      max: 120,
+      value: 70,
+      help: '70 C per PVC, 90 C per EPR/XLPE a pieno carico.',
+    ),
+    FieldSpec.number(
+      'reatt',
+      'Reattanza specifica',
+      unit: 'mohm/m',
+      min: 0,
+      max: 1,
+      value: 0.08,
+      help: 'Trascurabile sotto i 16 mm2. Cavi multipolari ~0,08.',
+    ),
+    FieldSpec.number(
+      'limite',
+      'Limite ammesso',
+      unit: '%',
+      min: 0.5,
+      max: 20,
+      value: 4,
+    ),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -100,18 +145,33 @@ class CadutaDiTensione extends Calculator {
     return CalcResult(
       [
         ResultLine.number('Caduta di tensione', dv, unit: 'V', primary: true),
-        ResultLine.number('Caduta percentuale', perc,
-            unit: '%',
-            primary: true,
-            severity: ok ? Severity.ok : Severity.fail),
+        ResultLine.number(
+          'Caduta percentuale',
+          perc,
+          unit: '%',
+          primary: true,
+          severity: ok ? Severity.ok : Severity.fail,
+        ),
         ResultLine.number('Tensione a fine linea', vFinale, unit: 'V'),
-        ResultLine.number('Resistenza specifica', r * 1000, unit: 'mohm/m',
-            decimals: 4),
-        ResultLine.number('Perdite di potenza', perdite, unit: 'W',
-            decimals: 1),
+        ResultLine.number(
+          'Resistenza specifica',
+          r * 1000,
+          unit: 'mohm/m',
+          decimals: 4,
+        ),
+        ResultLine.number(
+          'Perdite di potenza',
+          perdite,
+          unit: 'W',
+          decimals: 1,
+        ),
         if (sMin.isFinite)
-          ResultLine.number('Sezione minima per il limite', sMin, unit: 'mm2',
-              note: _prossimaSezione(sMin)),
+          ResultLine.number(
+            'Sezione minima per il limite',
+            sMin,
+            unit: 'mm2',
+            note: _prossimaSezione(sMin),
+          ),
       ],
       verdict: ok
           ? 'Entro il limite del ${limite.toStringAsFixed(1)}%'
@@ -150,35 +210,73 @@ class PortataCavo extends Calculator {
   List<String> get tags => ['ampacita', 'iz', 'ampacity', 'declassamento'];
   @override
   List<String> get references => [
-        'IEC 60364-5-52 tab. B.52.4 / B.52.14 / B.52.17',
-        'CEI-UNEL 35024-1'
-      ];
+    'IEC 60364-5-52 tab. B.52.4 / B.52.14 / B.52.17',
+    'CEI-UNEL 35024-1',
+  ];
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.number('sez', 'Sezione', unit: 'mm2', min: 1.5, max: 120,
-            value: 10),
-        FieldSpec.select('iso', 'Isolante', options: [
-          SelectOption('PVC', 'PVC (70 C)'),
-          SelectOption('XLPE', 'EPR / XLPE (90 C)'),
-        ], value: 'PVC'),
-        FieldSpec.select('posa', 'Metodo di posa', options: [
-          SelectOption('B1', 'B1 - unipolari in tubo/canale'),
-          SelectOption('B2', 'B2 - multipolare in tubo/canale'),
-          SelectOption('C', 'C - a parete o su passerella non forata'),
-          SelectOption('E', 'E - multipolare in aria libera'),
-        ], value: 'B1'),
-        FieldSpec.select('ncond', 'Conduttori attivi', options: [
-          SelectOption('2', '2 (monofase)'),
-          SelectOption('3', '3 (trifase)'),
-        ], value: '3'),
-        FieldSpec.number('tamb', 'Temperatura ambiente',
-            unit: 'C', min: 10, max: 60, value: 30),
-        FieldSpec.number('circuiti', 'Circuiti raggruppati',
-            min: 1, max: 20, value: 1),
-        FieldSpec.number('ib', 'Corrente di impiego',
-            unit: 'A', min: 0, max: 2000, value: 32),
-      ];
+    FieldSpec.number(
+      'sez',
+      'Sezione',
+      unit: 'mm2',
+      min: 1.5,
+      max: 120,
+      value: 10,
+    ),
+    FieldSpec.select(
+      'iso',
+      'Isolante',
+      options: [
+        SelectOption('PVC', 'PVC (70 C)'),
+        SelectOption('XLPE', 'EPR / XLPE (90 C)'),
+      ],
+      value: 'PVC',
+    ),
+    FieldSpec.select(
+      'posa',
+      'Metodo di posa',
+      options: [
+        SelectOption('B1', 'B1 - unipolari in tubo/canale'),
+        SelectOption('B2', 'B2 - multipolare in tubo/canale'),
+        SelectOption('C', 'C - a parete o su passerella non forata'),
+        SelectOption('E', 'E - multipolare in aria libera'),
+      ],
+      value: 'B1',
+    ),
+    FieldSpec.select(
+      'ncond',
+      'Conduttori attivi',
+      options: [
+        SelectOption('2', '2 (monofase)'),
+        SelectOption('3', '3 (trifase)'),
+      ],
+      value: '3',
+    ),
+    FieldSpec.number(
+      'tamb',
+      'Temperatura ambiente',
+      unit: 'C',
+      min: 10,
+      max: 60,
+      value: 30,
+    ),
+    FieldSpec.number(
+      'circuiti',
+      'Circuiti raggruppati',
+      min: 1,
+      max: 20,
+      value: 1,
+    ),
+    FieldSpec.number(
+      'ib',
+      'Corrente di impiego',
+      unit: 'A',
+      min: 0,
+      max: 2000,
+      value: 32,
+    ),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -192,15 +290,19 @@ class PortataCavo extends Calculator {
     final iz0 = tabella[sez];
     if (iz0 == null) {
       throw CalcException(
-          'Sezione $sez mm2 non presente. Sezioni disponibili: '
-          '${tabella.keys.join(", ")}.');
+        'Sezione $sez mm2 non presente. Sezioni disponibili: '
+        '${tabella.keys.join(", ")}.',
+      );
     }
     final k1 = interpola(
-        kTempAria[iso]!.map((k, v) => MapEntry(k as num, v)), i.num_('tamb'));
+      kTempAria[iso]!.map((k, v) => MapEntry(k as num, v)),
+      i.num_('tamb'),
+    );
     final nCirc = i.int_('circuiti');
     final k2 = interpola(
-        kRaggruppamento.map((k, v) => MapEntry(k as num, v)),
-        nCirc.toDouble());
+      kRaggruppamento.map((k, v) => MapEntry(k as num, v)),
+      nCirc.toDouble(),
+    );
     final iz = iz0 * k1 * k2;
     final ib = i.num_('ib');
     final ok = ib <= iz;
@@ -210,10 +312,14 @@ class PortataCavo extends Calculator {
         ResultLine.number('Portata a 30 C (Iz0)', iz0, unit: 'A', decimals: 1),
         ResultLine.number('k1 temperatura', k1, decimals: 3),
         ResultLine.number('k2 raggruppamento', k2, decimals: 3),
-        ResultLine.number('Portata effettiva Iz', iz, unit: 'A',
-            decimals: 1,
-            primary: true,
-            severity: ok ? Severity.ok : Severity.fail),
+        ResultLine.number(
+          'Portata effettiva Iz',
+          iz,
+          unit: 'A',
+          decimals: 1,
+          primary: true,
+          severity: ok ? Severity.ok : Severity.fail,
+        ),
         ResultLine.number('Margine su Ib', iz - ib, unit: 'A', decimals: 1),
         ResultLine.number('Utilizzo', ib / iz * 100, unit: '%', decimals: 1),
       ],
@@ -255,25 +361,66 @@ class CoordinamentoProtezione extends Calculator {
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.number('ib', 'Corrente di impiego',
-            unit: 'A', min: 0.1, max: 2000, value: 28),
-        FieldSpec.number('in', 'Corrente nominale protezione',
-            unit: 'A', min: 0.1, max: 2000, value: 32),
-        FieldSpec.number('iz', 'Portata del cavo Iz',
-            unit: 'A', min: 0.1, max: 2000, value: 42.9),
-        FieldSpec.number('sez', 'Sezione conduttore',
-            unit: 'mm2', min: 0.5, max: 630, value: 10),
-        FieldSpec.select('k', 'Conduttore/isolante', options: [
-          SelectOption('Cu-PVC', 'Rame - PVC (K=115)', numeric: 115),
-          SelectOption('Cu-XLPE', 'Rame - EPR/XLPE (K=143)', numeric: 143),
-          SelectOption('Al-PVC', 'Alluminio - PVC (K=76)', numeric: 76),
-          SelectOption('Al-XLPE', 'Alluminio - EPR/XLPE (K=94)', numeric: 94),
-        ], value: 'Cu-PVC'),
-        FieldSpec.number('icc', 'Corrente di cortocircuito',
-            unit: 'A', min: 1, max: 100000, value: 6000),
-        FieldSpec.number('tint', 'Tempo di intervento',
-            unit: 's', min: 0.001, max: 5, value: 0.1),
-      ];
+    FieldSpec.number(
+      'ib',
+      'Corrente di impiego',
+      unit: 'A',
+      min: 0.1,
+      max: 2000,
+      value: 28,
+    ),
+    FieldSpec.number(
+      'in',
+      'Corrente nominale protezione',
+      unit: 'A',
+      min: 0.1,
+      max: 2000,
+      value: 32,
+    ),
+    FieldSpec.number(
+      'iz',
+      'Portata del cavo Iz',
+      unit: 'A',
+      min: 0.1,
+      max: 2000,
+      value: 42.9,
+    ),
+    FieldSpec.number(
+      'sez',
+      'Sezione conduttore',
+      unit: 'mm2',
+      min: 0.5,
+      max: 630,
+      value: 10,
+    ),
+    FieldSpec.select(
+      'k',
+      'Conduttore/isolante',
+      options: [
+        SelectOption('Cu-PVC', 'Rame - PVC (K=115)', numeric: 115),
+        SelectOption('Cu-XLPE', 'Rame - EPR/XLPE (K=143)', numeric: 143),
+        SelectOption('Al-PVC', 'Alluminio - PVC (K=76)', numeric: 76),
+        SelectOption('Al-XLPE', 'Alluminio - EPR/XLPE (K=94)', numeric: 94),
+      ],
+      value: 'Cu-PVC',
+    ),
+    FieldSpec.number(
+      'icc',
+      'Corrente di cortocircuito',
+      unit: 'A',
+      min: 1,
+      max: 100000,
+      value: 6000,
+    ),
+    FieldSpec.number(
+      'tint',
+      'Tempo di intervento',
+      unit: 's',
+      min: 0.001,
+      max: 5,
+      value: 0.1,
+    ),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -300,23 +447,49 @@ class CoordinamentoProtezione extends Calculator {
 
     return CalcResult(
       [
-        ResultLine('Ib <= In', cond1 ? 'verificata' : 'NON verificata',
-            severity: cond1 ? Severity.ok : Severity.fail,
-            note: '${ib.toStringAsFixed(1)} <= ${inProt.toStringAsFixed(1)} A'),
-        ResultLine('In <= Iz', cond2 ? 'verificata' : 'NON verificata',
-            severity: cond2 ? Severity.ok : Severity.fail,
-            note: '${inProt.toStringAsFixed(1)} <= ${iz.toStringAsFixed(1)} A'),
-        ResultLine('If <= 1,45 Iz', cond3 ? 'verificata' : 'NON verificata',
-            severity: cond3 ? Severity.ok : Severity.fail,
-            note: 'If = ${iF.toStringAsFixed(1)} A'),
-        ResultLine.number('Energia specifica I2t', i2t, unit: 'A2s',
-            decimals: 0),
-        ResultLine.number('Sopportata dal cavo K2S2', k2s2, unit: 'A2s',
-            decimals: 0, severity: cond4 ? Severity.ok : Severity.fail),
-        ResultLine.number('Sezione minima al cortocircuito', sMin,
-            unit: 'mm2', primary: true),
-        ResultLine.number('Tempo massimo ammesso', tMax, unit: 's',
-            decimals: 3),
+        ResultLine(
+          'Ib <= In',
+          cond1 ? 'verificata' : 'NON verificata',
+          severity: cond1 ? Severity.ok : Severity.fail,
+          note: '${ib.toStringAsFixed(1)} <= ${inProt.toStringAsFixed(1)} A',
+        ),
+        ResultLine(
+          'In <= Iz',
+          cond2 ? 'verificata' : 'NON verificata',
+          severity: cond2 ? Severity.ok : Severity.fail,
+          note: '${inProt.toStringAsFixed(1)} <= ${iz.toStringAsFixed(1)} A',
+        ),
+        ResultLine(
+          'If <= 1,45 Iz',
+          cond3 ? 'verificata' : 'NON verificata',
+          severity: cond3 ? Severity.ok : Severity.fail,
+          note: 'If = ${iF.toStringAsFixed(1)} A',
+        ),
+        ResultLine.number(
+          'Energia specifica I2t',
+          i2t,
+          unit: 'A2s',
+          decimals: 0,
+        ),
+        ResultLine.number(
+          'Sopportata dal cavo K2S2',
+          k2s2,
+          unit: 'A2s',
+          decimals: 0,
+          severity: cond4 ? Severity.ok : Severity.fail,
+        ),
+        ResultLine.number(
+          'Sezione minima al cortocircuito',
+          sMin,
+          unit: 'mm2',
+          primary: true,
+        ),
+        ResultLine.number(
+          'Tempo massimo ammesso',
+          tMax,
+          unit: 's',
+          decimals: 3,
+        ),
       ],
       verdict: tutteOk
           ? 'Coordinamento verificato'
@@ -351,22 +524,50 @@ class AnelloDiGuasto extends Calculator {
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.number('u0', 'Tensione verso terra U0',
-            unit: 'V', min: 50, max: 500, value: 230),
-        FieldSpec.number('in', 'In protezione',
-            unit: 'A', min: 0.5, max: 2000, value: 32),
-        FieldSpec.select('curva', 'Curva magnetotermico', options: [
-          SelectOption('B', 'B (5 In)', numeric: 5),
-          SelectOption('C', 'C (10 In)', numeric: 10),
-          SelectOption('D', 'D (20 In)', numeric: 20),
-        ], value: 'C'),
-        FieldSpec.number('zsMis', 'Zs misurato',
-            unit: 'ohm', min: 0, max: 100, value: 0.45,
-            help: 'Valore letto dallo strumento di verifica.'),
-        FieldSpec.number('cmin', 'Coefficiente c',
-            min: 0.5, max: 1, value: 0.95,
-            help: 'Riduzione della tensione a vuoto in condizioni di guasto.'),
-      ];
+    FieldSpec.number(
+      'u0',
+      'Tensione verso terra U0',
+      unit: 'V',
+      min: 50,
+      max: 500,
+      value: 230,
+    ),
+    FieldSpec.number(
+      'in',
+      'In protezione',
+      unit: 'A',
+      min: 0.5,
+      max: 2000,
+      value: 32,
+    ),
+    FieldSpec.select(
+      'curva',
+      'Curva magnetotermico',
+      options: [
+        SelectOption('B', 'B (5 In)', numeric: 5),
+        SelectOption('C', 'C (10 In)', numeric: 10),
+        SelectOption('D', 'D (20 In)', numeric: 20),
+      ],
+      value: 'C',
+    ),
+    FieldSpec.number(
+      'zsMis',
+      'Zs misurato',
+      unit: 'ohm',
+      min: 0,
+      max: 100,
+      value: 0.45,
+      help: 'Valore letto dallo strumento di verifica.',
+    ),
+    FieldSpec.number(
+      'cmin',
+      'Coefficiente c',
+      min: 0.5,
+      max: 1,
+      value: 0.95,
+      help: 'Riduzione della tensione a vuoto in condizioni di guasto.',
+    ),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -382,18 +583,39 @@ class AnelloDiGuasto extends Calculator {
 
     return CalcResult(
       [
-        ResultLine.number('Corrente di intervento Ia', ia, unit: 'A',
-            decimals: 0),
-        ResultLine.number('Zs massima ammessa', zsMax, unit: 'ohm',
-            decimals: 3, primary: true),
-        ResultLine.number('Zs misurata', zsMis, unit: 'ohm',
-            decimals: 3,
-            primary: true,
-            severity: ok ? Severity.ok : Severity.fail),
-        ResultLine.number('Corrente di guasto presunta', iccPresunta,
-            unit: 'A', decimals: 0),
-        ResultLine.number('Margine', (zsMax - zsMis) / zsMax * 100, unit: '%',
-            decimals: 1),
+        ResultLine.number(
+          'Corrente di intervento Ia',
+          ia,
+          unit: 'A',
+          decimals: 0,
+        ),
+        ResultLine.number(
+          'Zs massima ammessa',
+          zsMax,
+          unit: 'ohm',
+          decimals: 3,
+          primary: true,
+        ),
+        ResultLine.number(
+          'Zs misurata',
+          zsMis,
+          unit: 'ohm',
+          decimals: 3,
+          primary: true,
+          severity: ok ? Severity.ok : Severity.fail,
+        ),
+        ResultLine.number(
+          'Corrente di guasto presunta',
+          iccPresunta,
+          unit: 'A',
+          decimals: 0,
+        ),
+        ResultLine.number(
+          'Margine',
+          (zsMax - zsMis) / zsMax * 100,
+          unit: '%',
+          decimals: 1,
+        ),
       ],
       verdict: ok
           ? 'Protezione garantita dal magnetotermico'
@@ -433,15 +655,37 @@ class Rifasamento extends Calculator {
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.number('p', 'Potenza attiva',
-            unit: 'kW', min: 0.1, max: 100000, value: 30),
-        FieldSpec.number('cos1', 'cosphi attuale',
-            min: 0.05, max: 0.999, value: 0.75),
-        FieldSpec.number('cos2', 'cosphi desiderato',
-            min: 0.1, max: 1, value: 0.95),
-        FieldSpec.number('un', 'Tensione concatenata',
-            unit: 'V', min: 100, max: 1000, value: 400),
-      ];
+    FieldSpec.number(
+      'p',
+      'Potenza attiva',
+      unit: 'kW',
+      min: 0.1,
+      max: 100000,
+      value: 30,
+    ),
+    FieldSpec.number(
+      'cos1',
+      'cosphi attuale',
+      min: 0.05,
+      max: 0.999,
+      value: 0.75,
+    ),
+    FieldSpec.number(
+      'cos2',
+      'cosphi desiderato',
+      min: 0.1,
+      max: 1,
+      value: 0.95,
+    ),
+    FieldSpec.number(
+      'un',
+      'Tensione concatenata',
+      unit: 'V',
+      min: 100,
+      max: 1000,
+      value: 400,
+    ),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -450,7 +694,8 @@ class Rifasamento extends Calculator {
     final cos2 = i.num_('cos2');
     if (cos2 <= cos1) {
       throw const CalcException(
-          'Il cosphi desiderato deve essere maggiore di quello attuale.');
+        'Il cosphi desiderato deve essere maggiore di quello attuale.',
+      );
     }
     final un = i.num_('un');
     final tan1 = math.tan(math.acos(cos1));
@@ -465,19 +710,37 @@ class Rifasamento extends Calculator {
 
     return CalcResult(
       [
-        ResultLine.number('Potenza reattiva necessaria', qc, unit: 'kvar',
-            primary: true),
+        ResultLine.number(
+          'Potenza reattiva necessaria',
+          qc,
+          unit: 'kvar',
+          primary: true,
+        ),
         ResultLine.number('Potenza apparente prima', s1, unit: 'kVA'),
         ResultLine.number('Potenza apparente dopo', s2, unit: 'kVA'),
         ResultLine.number('Corrente prima', i1, unit: 'A', decimals: 1),
-        ResultLine.number('Corrente dopo', i2, unit: 'A',
-            decimals: 1, severity: Severity.ok),
-        ResultLine.number('Riduzione di corrente', (1 - i2 / i1) * 100,
-            unit: '%', decimals: 1),
-        ResultLine.number('Capacita\' per fase (triangolo, 50 Hz)', cTri,
-            unit: 'uF', decimals: 1),
+        ResultLine.number(
+          'Corrente dopo',
+          i2,
+          unit: 'A',
+          decimals: 1,
+          severity: Severity.ok,
+        ),
+        ResultLine.number(
+          'Riduzione di corrente',
+          (1 - i2 / i1) * 100,
+          unit: '%',
+          decimals: 1,
+        ),
+        ResultLine.number(
+          'Capacita\' per fase (triangolo, 50 Hz)',
+          cTri,
+          unit: 'uF',
+          decimals: 1,
+        ),
       ],
-      verdict: 'Batteria da ${qc.ceil()} kvar (arrotondare al taglio commerciale)',
+      verdict:
+          'Batteria da ${qc.ceil()} kvar (arrotondare al taglio commerciale)',
       verdictSeverity: Severity.ok,
       warnings: const [
         'In presenza di armoniche prevedere reattanze di sbarramento.',
@@ -502,7 +765,12 @@ class MotoreAsincrono extends Calculator {
   @override
   Domain get domain => Domain.elettrico;
   @override
-  List<String> get tags => ['targa', 'asincrono', 'scorrimento', 'stella triangolo'];
+  List<String> get tags => [
+    'targa',
+    'asincrono',
+    'scorrimento',
+    'stella triangolo',
+  ];
   @override
   List<String> get references => ['IEC 60034-1', 'CEI EN 60947-4-1'];
   @override
@@ -513,24 +781,56 @@ class MotoreAsincrono extends Calculator {
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.number('pn', 'Potenza resa',
-            unit: 'kW', min: 0.01, max: 5000, value: 7.5),
-        FieldSpec.number('un', 'Tensione nominale',
-            unit: 'V', min: 100, max: 1000, value: 400),
-        FieldSpec.number('cosphi', 'cosphi di targa',
-            min: 0.3, max: 1, value: 0.85),
-        FieldSpec.number('rend', 'Rendimento',
-            min: 0.3, max: 1, value: 0.88),
-        FieldSpec.number('freq', 'Frequenza',
-            unit: 'Hz', min: 10, max: 400, value: 50),
-        FieldSpec.number('poli', 'Numero di poli',
-            min: 2, max: 24, value: 4,
-            help: 'Sempre pari: 2, 4, 6, 8...'),
-        FieldSpec.number('ngiri', 'Velocita\' di targa',
-            unit: 'rpm', min: 1, max: 30000, value: 1440),
-        FieldSpec.number('rapporto', 'Rapporto Ia/In',
-            min: 1, max: 15, value: 6.5),
-      ];
+    FieldSpec.number(
+      'pn',
+      'Potenza resa',
+      unit: 'kW',
+      min: 0.01,
+      max: 5000,
+      value: 7.5,
+    ),
+    FieldSpec.number(
+      'un',
+      'Tensione nominale',
+      unit: 'V',
+      min: 100,
+      max: 1000,
+      value: 400,
+    ),
+    FieldSpec.number(
+      'cosphi',
+      'cosphi di targa',
+      min: 0.3,
+      max: 1,
+      value: 0.85,
+    ),
+    FieldSpec.number('rend', 'Rendimento', min: 0.3, max: 1, value: 0.88),
+    FieldSpec.number(
+      'freq',
+      'Frequenza',
+      unit: 'Hz',
+      min: 10,
+      max: 400,
+      value: 50,
+    ),
+    FieldSpec.number(
+      'poli',
+      'Numero di poli',
+      min: 2,
+      max: 24,
+      value: 4,
+      help: 'Sempre pari: 2, 4, 6, 8...',
+    ),
+    FieldSpec.number(
+      'ngiri',
+      'Velocita\' di targa',
+      unit: 'rpm',
+      min: 1,
+      max: 30000,
+      value: 1440,
+    ),
+    FieldSpec.number('rapporto', 'Rapporto Ia/In', min: 1, max: 15, value: 6.5),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -559,23 +859,51 @@ class MotoreAsincrono extends Calculator {
 
     return CalcResult(
       [
-        ResultLine.number('Corrente nominale', inom, unit: 'A',
-            decimals: 2, primary: true),
-        ResultLine.number('Coppia nominale', coppia, unit: 'Nm',
-            decimals: 2, primary: true),
-        ResultLine.number('Velocita\' di sincronismo', ns, unit: 'rpm',
-            decimals: 0),
-        ResultLine.number('Scorrimento', s, unit: '%',
-            severity: sSospetto ? Severity.warn : Severity.ok),
+        ResultLine.number(
+          'Corrente nominale',
+          inom,
+          unit: 'A',
+          decimals: 2,
+          primary: true,
+        ),
+        ResultLine.number(
+          'Coppia nominale',
+          coppia,
+          unit: 'Nm',
+          decimals: 2,
+          primary: true,
+        ),
+        ResultLine.number(
+          'Velocita\' di sincronismo',
+          ns,
+          unit: 'rpm',
+          decimals: 0,
+        ),
+        ResultLine.number(
+          'Scorrimento',
+          s,
+          unit: '%',
+          severity: sSospetto ? Severity.warn : Severity.ok,
+        ),
         ResultLine.number('Potenza assorbita', pAss, unit: 'kW'),
         ResultLine.number('Potenza persa', pAss - pn, unit: 'kW'),
-        ResultLine.number('Corrente di spunto (diretto)', iSpunto, unit: 'A',
-            decimals: 1),
-        ResultLine.number('Corrente di spunto (stella)', iSpuntoY, unit: 'A',
-            decimals: 1, note: 'Coppia di spunto: $coppiaSpuntoY'),
+        ResultLine.number(
+          'Corrente di spunto (diretto)',
+          iSpunto,
+          unit: 'A',
+          decimals: 1,
+        ),
+        ResultLine.number(
+          'Corrente di spunto (stella)',
+          iSpuntoY,
+          unit: 'A',
+          decimals: 1,
+          note: 'Coppia di spunto: $coppiaSpuntoY',
+        ),
         ResultLine.number('Coppie di poli', poli / 2, unit: '', decimals: 0),
       ],
-      verdict: 'Motore a $poli poli, ${ns.toStringAsFixed(0)} rpm di sincronismo',
+      verdict:
+          'Motore a $poli poli, ${ns.toStringAsFixed(0)} rpm di sincronismo',
       verdictSeverity: sSospetto ? Severity.warn : Severity.ok,
       warnings: [
         if (sSospetto)
@@ -611,22 +939,38 @@ class SegnaleAnalogico extends Calculator {
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.select('tipo', 'Tipo di segnale', options: [
-          SelectOption('4-20', '4-20 mA'),
-          SelectOption('0-20', '0-20 mA'),
-          SelectOption('0-10', '0-10 V'),
-          SelectOption('2-10', '2-10 V'),
-        ], value: '4-20'),
-        FieldSpec.select('verso', 'Direzione', options: [
-          SelectOption('s2p', 'Segnale -> grandezza'),
-          SelectOption('p2s', 'Grandezza -> segnale'),
-        ], value: 's2p'),
-        FieldSpec.number('val', 'Valore da convertire', value: 12.8),
-        FieldSpec.number('pvMin', 'Fondo scala minimo', value: 0),
-        FieldSpec.number('pvMax', 'Fondo scala massimo', value: 250),
-        FieldSpec.number('bit', 'Risoluzione ADC',
-            unit: 'bit', min: 8, max: 24, value: 12),
-      ];
+    FieldSpec.select(
+      'tipo',
+      'Tipo di segnale',
+      options: [
+        SelectOption('4-20', '4-20 mA'),
+        SelectOption('0-20', '0-20 mA'),
+        SelectOption('0-10', '0-10 V'),
+        SelectOption('2-10', '2-10 V'),
+      ],
+      value: '4-20',
+    ),
+    FieldSpec.select(
+      'verso',
+      'Direzione',
+      options: [
+        SelectOption('s2p', 'Segnale -> grandezza'),
+        SelectOption('p2s', 'Grandezza -> segnale'),
+      ],
+      value: 's2p',
+    ),
+    FieldSpec.number('val', 'Valore da convertire', value: 12.8),
+    FieldSpec.number('pvMin', 'Fondo scala minimo', value: 0),
+    FieldSpec.number('pvMax', 'Fondo scala massimo', value: 250),
+    FieldSpec.number(
+      'bit',
+      'Risoluzione ADC',
+      unit: 'bit',
+      min: 8,
+      max: 24,
+      value: 12,
+    ),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -662,17 +1006,34 @@ class SegnaleAnalogico extends Calculator {
     return CalcResult(
       [
         ResultLine.number('Grandezza di processo', pv, primary: true),
-        ResultLine.number('Segnale', segnale, unit: unit,
-            decimals: 3, primary: true),
-        ResultLine.number('Percentuale scala', perc, unit: '%',
-            decimals: 2,
-            severity: fuoriRange ? Severity.warn : Severity.neutral),
+        ResultLine.number(
+          'Segnale',
+          segnale,
+          unit: unit,
+          decimals: 3,
+          primary: true,
+        ),
+        ResultLine.number(
+          'Percentuale scala',
+          perc,
+          unit: '%',
+          decimals: 2,
+          severity: fuoriRange ? Severity.warn : Severity.neutral,
+        ),
         ResultLine.number('Conteggi ADC a $bit bit', conteggi, decimals: 0),
-        ResultLine.number('Risoluzione', risoluzione, decimals: 4,
-            note: 'Minima variazione distinguibile'),
+        ResultLine.number(
+          'Risoluzione',
+          risoluzione,
+          decimals: 4,
+          note: 'Minima variazione distinguibile',
+        ),
         if (tipo == '4-20')
-          ResultLine.number('Caduta su resistenza 250 ohm', segnale * 0.25,
-              unit: 'V', decimals: 3),
+          ResultLine.number(
+            'Caduta su resistenza 250 ohm',
+            segnale * 0.25,
+            unit: 'V',
+            decimals: 3,
+          ),
       ],
       verdict: rotturaLinea
           ? 'Sotto 3,6 mA: sospetta interruzione del circuito'
@@ -699,7 +1060,8 @@ class TermoresistenzaPt extends Calculator {
   @override
   String get name => 'PT100 / PT1000';
   @override
-  String get subtitle => 'Conversione resistenza-temperatura (Callendar-Van Dusen)';
+  String get subtitle =>
+      'Conversione resistenza-temperatura (Callendar-Van Dusen)';
   @override
   Domain get domain => Domain.elettrico;
   @override
@@ -709,19 +1071,35 @@ class TermoresistenzaPt extends Calculator {
 
   @override
   List<FieldSpec> get fields => const [
-        FieldSpec.select('tipo', 'Sensore', options: [
-          SelectOption('pt100', 'PT100', numeric: 100),
-          SelectOption('pt1000', 'PT1000', numeric: 1000),
-        ], value: 'pt100'),
-        FieldSpec.select('verso', 'Direzione', options: [
-          SelectOption('r2t', 'Resistenza -> temperatura'),
-          SelectOption('t2r', 'Temperatura -> resistenza'),
-        ], value: 'r2t'),
-        FieldSpec.number('val', 'Valore da convertire', value: 119.4),
-        FieldSpec.number('rCavo', 'Resistenza di linea (2 fili)',
-            unit: 'ohm', min: 0, max: 50, value: 0,
-            help: 'Somma andata+ritorno. A 3/4 fili lasciare 0.'),
-      ];
+    FieldSpec.select(
+      'tipo',
+      'Sensore',
+      options: [
+        SelectOption('pt100', 'PT100', numeric: 100),
+        SelectOption('pt1000', 'PT1000', numeric: 1000),
+      ],
+      value: 'pt100',
+    ),
+    FieldSpec.select(
+      'verso',
+      'Direzione',
+      options: [
+        SelectOption('r2t', 'Resistenza -> temperatura'),
+        SelectOption('t2r', 'Temperatura -> resistenza'),
+      ],
+      value: 'r2t',
+    ),
+    FieldSpec.number('val', 'Valore da convertire', value: 119.4),
+    FieldSpec.number(
+      'rCavo',
+      'Resistenza di linea (2 fili)',
+      unit: 'ohm',
+      min: 0,
+      max: 50,
+      value: 0,
+      help: 'Somma andata+ritorno. A 3/4 fili lasciare 0.',
+    ),
+  ];
 
   @override
   CalcResult compute(Inputs i) {
@@ -738,23 +1116,32 @@ class TermoresistenzaPt extends Calculator {
       t = val;
       r = _tempAResistenza(t, r0);
     }
-    final errCavo =
-        (rCavo > 0 && verso == 'r2t') ? _resistenzaATemp(val, r0) - t : 0.0;
+    final errCavo = (rCavo > 0 && verso == 'r2t')
+        ? _resistenzaATemp(val, r0) - t
+        : 0.0;
     final tollB = 0.30 + 0.005 * t.abs();
     final tollA = 0.15 + 0.002 * t.abs();
 
     return CalcResult(
       [
         ResultLine.number('Temperatura', t, unit: 'C', primary: true),
-        ResultLine.number('Resistenza sensore', r, unit: 'ohm',
-            decimals: 3, primary: true),
-        ResultLine.number('Tolleranza classe A', tollA, unit: 'C',
-            decimals: 2),
-        ResultLine.number('Tolleranza classe B', tollB, unit: 'C',
-            decimals: 2),
+        ResultLine.number(
+          'Resistenza sensore',
+          r,
+          unit: 'ohm',
+          decimals: 3,
+          primary: true,
+        ),
+        ResultLine.number('Tolleranza classe A', tollA, unit: 'C', decimals: 2),
+        ResultLine.number('Tolleranza classe B', tollB, unit: 'C', decimals: 2),
         if (rCavo > 0 && verso == 'r2t')
-          ResultLine.number('Errore da resistenza di linea', errCavo,
-              unit: 'C', decimals: 2, severity: Severity.warn),
+          ResultLine.number(
+            'Errore da resistenza di linea',
+            errCavo,
+            unit: 'C',
+            decimals: 2,
+            severity: Severity.warn,
+          ),
       ],
       verdict: (rCavo > 0 && verso == 'r2t')
           ? 'Collegamento a 2 fili: errore sistematico in eccesso'
@@ -784,8 +1171,8 @@ class TermoresistenzaPt extends Calculator {
     var t = (ratio - 1) / (_a);
     for (var k = 0; k < 50; k++) {
       final f = _tempAResistenza(t, r0) - r;
-      final d = (_tempAResistenza(t + 1e-4, r0) -
-              _tempAResistenza(t - 1e-4, r0)) /
+      final d =
+          (_tempAResistenza(t + 1e-4, r0) - _tempAResistenza(t - 1e-4, r0)) /
           2e-4;
       final step = f / d;
       t -= step;

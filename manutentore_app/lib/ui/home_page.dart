@@ -25,9 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   void _apri(Calculator c) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => CalcolatorePage(calcolatore: c),
-      ),
+      MaterialPageRoute<void>(builder: (_) => CalcolatorePage(calcolatore: c)),
     );
   }
 
@@ -192,17 +190,17 @@ class _TitoloSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(T.s4, T.s3, T.s4, T.s2),
-        child: Text(
-          testo.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            letterSpacing: 1,
-            fontWeight: FontWeight.w600,
-            color: context.c.muted,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.fromLTRB(T.s4, T.s3, T.s4, T.s2),
+    child: Text(
+      testo.toUpperCase(),
+      style: TextStyle(
+        fontSize: 11,
+        letterSpacing: 1,
+        fontWeight: FontWeight.w600,
+        color: context.c.muted,
+      ),
+    ),
+  );
 }
 
 class _Sezione extends StatelessWidget {

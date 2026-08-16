@@ -5,6 +5,16 @@
 /// dare un ordine di grandezza verificabile in campo.
 library;
 
+// dart format off
+//
+// I letterali qui sotto sono tabelle e vanno lette come tabelle: una riga per
+// posa, una colonna per sezione, come stanno nella norma da cui sono
+// trascritte. Il formatter le spezzerebbe a un valore per riga, rendendo
+// impraticabile il confronto a vista con la CEI-UNEL o la ISO, che e'
+// esattamente l'operazione che serve quando si sospetta un errore di
+// trascrizione. Il resto del repo e' formattato e la CI lo verifica: questa e'
+// l'unica eccezione, e finisce prima di `interpola()`.
+
 // ---------------------------------------------------------------------------
 // ELETTRICO
 // ---------------------------------------------------------------------------
@@ -163,6 +173,8 @@ const kIso10816 = <String, List<double>>{
 const kIsoVg = <int, double>{
   22: 22, 32: 32, 46: 46, 68: 68, 100: 100, 150: 150, 220: 220, 320: 320
 };
+
+// dart format on
 
 /// Interpola linearmente su una mappa chiave->valore ordinata.
 double interpola(Map<num, double> tabella, double x) {
