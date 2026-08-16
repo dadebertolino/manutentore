@@ -98,30 +98,12 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
     cronologia.registra(
       VoceCronologia(
         calcId: widget.calcolatore.id,
-        valori: _valoriNormalizzati(),
+        // Nessuna conversione: `CampoInput` emette gia' dei `num`.
+        valori: Map<String, Object?>.from(_valori),
         quando: DateTime.now(),
         sintesi: primaria.label.isEmpty ? r.verdict : primaria.toString(),
       ),
     );
-  }
-
-  /// I campi numerici arrivano dalla tastiera come stringhe: `Inputs` le sa
-  /// leggere, ma in cronologia vanno messe via come numeri.
-  ///
-  /// Senza questa conversione la stessa combinazione digitata a mano o
-  /// lasciata al default sembrerebbe due calcoli diversi, e al ripristino il
-  /// campo tornerebbe vuoto, perche' [_formatoIniziale] mostra solo i `num`.
-  Map<String, Object?> _valoriNormalizzati() {
-    final out = <String, Object?>{};
-    for (final f in widget.calcolatore.fields) {
-      final v = _valori[f.key];
-      if (f.type == FieldType.number && v is String) {
-        out[f.key] = double.tryParse(v.trim().replaceAll(',', '.')) ?? v;
-      } else {
-        out[f.key] = v;
-      }
-    }
-    return out;
   }
 
   bool _valoriSonoIDefault() =>

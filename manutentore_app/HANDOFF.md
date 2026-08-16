@@ -299,12 +299,15 @@ aggiornare sia lo script sia questa sezione.
   campo, aggiorna il calcolo, non solo l'avviso.
 - **La verifica adiabatica I²t** assume tempo di intervento noto e costante.
   Non è la curva reale dell'interruttore. Non promettere selettività.
-- **I campi numerici emettono `String`, non `num`.** `CampoInput` passa il
-  testo grezzo, e `Inputs.num_` lo sa leggere — per cui i calcoli funzionano e
-  la cosa non si nota. Si nota quando quei valori vanno *altrove*:
-  `_formatoIniziale` mostra solo i `num`, quindi la cronologia normalizza a
-  numero prima di salvare, altrimenti al ripristino i campi tornerebbero vuoti.
-  Se aggiungi una feature che rilegge `_valori`, ricordatene.
+- **`CampoInput` emette `num`, non il testo digitato** — e deve restare così.
+  Prima passava la stringa grezza: i calcoli funzionavano lo stesso, perché
+  `Inputs.num_` la sa leggere, quindi la cosa non si notava finché quei valori
+  non finivano *altrove*. La cronologia li salvava come stringhe e al
+  ripristino i campi tornavano vuoti, perché `_formatoIniziale` mostra solo i
+  `num`. Ora la conversione è in `CampoInput.comeNumero`, un punto solo, con la
+  stessa espressione di `Inputs.num_`: se le due divergono, un valore digitato
+  dà un errore diverso da uno ripristinato. C'è un test che verifica il tipo,
+  perché `75 == 75.0` è vero e una regressione passerebbe inosservata.
 - **Non chiamare `notifyListeners()` dentro `dispose()`.** L'albero è bloccato
   durante lo smontaggio e Flutter lancia *"markNeedsBuild called when widget
   tree was locked"*. La cronologia registra proprio lì, quindi rimanda la

@@ -101,6 +101,25 @@ void main() {
       expect(cron.voci, hasLength(1));
       expect(cron.voci.first.calcId, 'el.caduta_tensione');
       expect(cron.voci.first.valori['lung'], 75);
+      // Un `num`, non il testo digitato: se `CampoInput` tornasse a emettere
+      // stringhe il ripristino mostrerebbe campi vuoti, e nessun altro test
+      // se ne accorgerebbe (75 == '75' e' falso, ma 75 == 75.0 e' vero).
+      expect(cron.voci.first.valori['lung'], isA<num>());
+    });
+
+    testWidgets('la virgola vale come separatore decimale', (tester) async {
+      final cron = await avvia(tester);
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Lunghezza linea'),
+        '62,5',
+      );
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      expect(cron.voci.first.valori['lung'], 62.5);
     });
 
     testWidgets('aprire e uscire senza toccare niente non registra nulla', (

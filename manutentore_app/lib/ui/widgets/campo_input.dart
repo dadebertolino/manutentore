@@ -63,9 +63,25 @@ class CampoInput extends StatelessWidget {
         ),
         helperText: mostraAiuto ? spec.help : null,
       ),
-      onChanged: (t) => onChanged(t),
+      onChanged: (t) => onChanged(comeNumero(t)),
     );
   }
+
+  /// Converte il testo digitato nel numero che rappresenta, o `null` se ancora
+  /// non ne rappresenta uno.
+  ///
+  /// Il campo emette un `num`, non il testo grezzo: cosi' chi legge i valori a
+  /// valle — cronologia, ripristino, copia — trova sempre lo stesso tipo,
+  /// qualunque sia il campo e comunque ci sia arrivato l'utente.
+  ///
+  /// L'espressione e' la stessa che usa `Inputs.num_` nel core, e la coerenza
+  /// non e' un caso: se qui si accettasse piu' o meno di la', un valore
+  /// digitato darebbe un errore diverso da uno ripristinato. La virgola vale
+  /// come separatore decimale, e gli stati intermedi della digitazione ("-",
+  /// "1.") si comportano come prima — `null` diventa il messaggio d'errore di
+  /// `CalcException`, esattamente come il campo vuoto.
+  static num? comeNumero(String testo) =>
+      double.tryParse(testo.trim().replaceAll(',', '.'));
 
   Widget _selezione(BuildContext context) {
     final corrente = valore is String && (valore as String).isNotEmpty
