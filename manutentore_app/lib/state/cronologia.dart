@@ -88,6 +88,19 @@ class Cronologia extends ChangeNotifier {
 
   bool get isEmpty => _voci.isEmpty;
 
+  /// Gli input dell'ultimo calcolo fatto con questo calcolatore, se c'e'.
+  ///
+  /// Serve a riaprire un calcolatore dove lo si era lasciato: in campo si
+  /// rifa' lo stesso calcolo cambiando una variabile sola, e ridigitare le
+  /// altre sei e' tempo perso sotto un quadro aperto. Le voci sono in ordine
+  /// dalla piu' recente, quindi la prima che combacia e' quella giusta.
+  Map<String, Object?>? ultimiValori(String calcId) {
+    for (final v in _voci) {
+      if (v.calcId == calcId) return v.valori;
+    }
+    return null;
+  }
+
   /// Registra un calcolo, portandolo in cima.
   ///
   /// Se lo stesso calcolo con gli stessi input c'e' gia', viene spostato in

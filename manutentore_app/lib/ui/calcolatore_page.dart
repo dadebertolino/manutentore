@@ -42,6 +42,14 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
   CalcResult? _risultato;
   String? _errore;
 
+  /// L'utente ha toccato almeno un campo in questa visita.
+  ///
+  /// Non basta piu' confrontare i valori con i default: da quando si riapre un
+  /// calcolatore sugli ultimi valori usati, i valori sono *quasi sempre*
+  /// diversi dai default, e senza questo flag il solo aprire e chiudere una
+  /// scheda ne aggiornerebbe la posizione e l'ora in cronologia.
+  bool _modificato = false;
+
   @override
   void initState() {
     super.initState();
@@ -89,7 +97,7 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
     final cronologia = _cronologia;
     if (r == null || cronologia == null) return;
     // Aprire un calcolatore e uscirne senza toccare niente non e' un calcolo.
-    if (_valoriSonoIDefault()) return;
+    if (!_modificato) return;
     final primaria = r.lines.firstWhere(
       (l) => l.primary,
       orElse: () =>
@@ -105,9 +113,6 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
       ),
     );
   }
-
-  bool _valoriSonoIDefault() =>
-      widget.calcolatore.fields.every((f) => _valori[f.key] == f.initial);
 
   static String _formatoIniziale(Object? v) {
     if (v is! num) return '';
@@ -134,6 +139,7 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
 
   void _aggiorna(String chiave, Object? valore) {
     setState(() {
+      _modificato = true;
       _valori[chiave] = valore;
       _ricalcola();
     });
@@ -141,6 +147,7 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
 
   void _reimposta() {
     setState(() {
+      _modificato = true;
       for (final f in widget.calcolatore.fields) {
         _valori[f.key] = f.initial;
         _controller[f.key]?.text = _formatoIniziale(f.initial);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:manutentore_core/manutentore_core.dart';
 
+import '../state/cronologia.dart';
 import '../state/impostazioni.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -25,8 +26,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _apri(Calculator c) {
+    // Riparte dagli ultimi valori usati, se ce ne sono: la cronologia li ha
+    // gia' salvati per calcolatore, qui basta rileggerli.
+    final valori = CronologiaScope.of(context).ultimiValori(c.id);
     Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => CalcolatorePage(calcolatore: c)),
+      MaterialPageRoute<void>(
+        builder: (_) => CalcolatorePage(calcolatore: c, valoriIniziali: valori),
+      ),
     );
   }
 

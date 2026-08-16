@@ -159,6 +159,55 @@ void main() {
       expect(campo.controller?.text, '75');
     });
 
+    testWidgets('riaprire un calcolatore ritrova gli ultimi valori usati', (
+      tester,
+    ) async {
+      await avvia(tester);
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Lunghezza linea'),
+        '88',
+      );
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      // Riaperto dalla home, non dalla cronologia.
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      final campo = tester.widget<TextField>(
+        find.widgetWithText(TextField, 'Lunghezza linea'),
+      );
+      expect(campo.controller?.text, '88');
+    });
+
+    testWidgets('riaprire e uscire senza toccare non sposta la voce', (
+      tester,
+    ) async {
+      final cron = await avvia(tester);
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Lunghezza linea'),
+        '88',
+      );
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      final primaVolta = cron.voci.first.quando;
+
+      // Ora i valori ripristinati non sono i default: senza il flag
+      // "modificato" questo giro riscriverebbe la voce con l'ora nuova.
+      await tester.tap(find.text('Caduta di tensione'));
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      expect(cron.voci, hasLength(1));
+      expect(cron.voci.first.quando, primaVolta);
+    });
+
     test('lo stesso calcolo non occupa due posizioni', () async {
       SharedPreferences.setMockInitialValues({});
       final cron = await Cronologia.carica();

@@ -33,7 +33,7 @@ manutentore/
 │   ├── lib/src/electrical.dart  8 calcolatori
 │   ├── lib/src/mechanical.dart  9 calcolatori
 │   ├── lib/src/registry.dart    Registro + ricerca + verifica integrità
-│   └── test/                    36 test con valori di riferimento verificati
+│   └── test/                    37 test con valori di riferimento verificati
 └── manutentore_app/       App Flutter — SCHELETRO FUNZIONANTE
     ├── lib/theme/         Token e temi chiaro/scuro
     ├── lib/state/         impostazioni.dart: modalità, tema, preferiti
@@ -41,7 +41,7 @@ manutentore/
     ├── lib/ui/            Home, calcolo generico, cronologia, widget
     ├── assets/fonts/      IBM Plex Sans e Mono (OFL), 5 pesi
     ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
-    └── test/              12 test: UI di superficie + cronologia
+    └── test/              15 test: UI, cronologia, persistenza input
 ```
 
 I due package sono **cartelle sorelle**. `manutentore_app/pubspec.yaml`
@@ -57,8 +57,8 @@ Stato verificato il 2026-08-16:
 
 | package | `analyze` | test |
 |---|---|---|
-| `manutentore_core` | pulito | 36 passati |
-| `manutentore_app`  | pulito | 12 passati |
+| `manutentore_core` | pulito | 37 passati |
+| `manutentore_app`  | pulito | 15 passati |
 
 ```bash
 cd manutentore_core && dart pub get && dart analyze && dart test
@@ -122,6 +122,18 @@ di toccarla:
   `CalcolatorePage` accetta `valoriIniziali`. Le chiavi che il calcolatore non
   conosce più vengono ignorate, così una voce vecchia non trascina campi
   orfani.
+
+La cronologia è anche il magazzino della **persistenza per calcolatore**:
+aprire una scheda dalla home riparte dagli ultimi valori usati, letti con
+`Cronologia.ultimiValori(calcId)`. Non c'è un secondo posto dove si salvano
+gli input, e non deve nascerne uno.
+
+Conseguenza da non perdere di vista: da quando si riapre sui valori di prima,
+**i valori sono quasi sempre diversi dai default**, quindi "ha calcolato
+qualcosa" non si può più dedurre dal confronto con `f.initial`. Ci pensa il
+flag `_modificato` in `CalcolatorePage`, alzato solo quando l'utente tocca un
+campo. Senza, il solo aprire e chiudere una scheda ne aggiornerebbe posizione
+e ora in cronologia. C'è un test che lo verifica.
 
 ### Modalità studente / professionista
 
@@ -253,25 +265,22 @@ aggiornare sia lo script sia questa sezione.
 ## 7. Backlog, in ordine
 
 ### Rendere usabile in campo
-1. **Persistenza degli input per calcolatore**: riaprendo un calcolatore
-   ritrova gli ultimi valori usati. In campo si rifà lo stesso calcolo con una
-   variabile diversa.
-2. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
+1. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
    share sheet (mai upload). È la funzione che fa scaricare l'app a chi lavora
    davvero. Valuta `pdf` + `printing` — sono da approvare come dipendenze.
-3. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
+2. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
    supporto al text scaling fino a 200% senza overflow nella `TargaRisultato`.
 
 ### Crescere in contenuto
-4. **Altri calcolatori**: sezione da corrente di corto, resistenza di
+3. **Altri calcolatori**: sezione da corrente di corto, resistenza di
    isolamento, termocoppie K/J, ISO VG e compatibilità grassi, allineamento
    alberi, tolleranze ISO H7/g6, perdite di carico nelle tubazioni, MTBF/MTTR
    e OEE.
-5. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
+4. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
    ISO 1219, codici colore, classi IP/IK, coppie di serraggio a colpo d'occhio.
    Serve un nuovo tipo di scheda nel registro — progettalo, non forzarlo dentro
    `Calculator`.
-6. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
+5. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
    all'avviamento"*, *"cuscinetto rumoroso"*: sequenze di verifiche dove
    l'esito determina il passo successivo. È la parte con più valore didattico
    e la meno banale da modellare: **serve un modello dati nuovo** (nodo,
@@ -279,7 +288,7 @@ aggiornare sia lo script sia questa sezione.
    Davide prima di implementare.
 
 ### Pubblicare
-7. Icona, splash, screenshot **senza dati reali**, testi store con
+6. Icona, splash, screenshot **senza dati reali**, testi store con
    inquadramento adulto, privacy policy su davidebertolino.it, README con
    sezione privacy.
 
