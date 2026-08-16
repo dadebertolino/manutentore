@@ -1,0 +1,93 @@
+name: CI
+
+# Due promesse di questo repo hanno bisogno di un controllo automatico, non di
+# una riga in un documento: la build verde (HANDOFF.md §2) e lo zero
+# tracciamento (HANDOFF.md §5). Sono i tre job qui sotto.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Un push che arriva mentre la CI sta girando annulla la corsa precedente:
+# conta solo l'ultimo commit.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Versioni fissate di proposito. Un aggiornamento di Flutter deve essere una
+  # scelta, fatta in un commit che si vede, non qualcosa che rompe la CI di
+  # lunedi' mattina su un ramo che non c'entra. Quando aggiorni, allinea anche
+  # HANDOFF.md §2.
+  FLUTTER_VERSION: 3.41.5
+  DART_VERSION: 3.11.3
+
+jobs:
+  # Il job piu' importante e anche il piu' veloce: nessun SDK da installare,
+  # risponde in pochi secondi. Se cade questo, non importa se i test passano.
+  privacy:
+    name: Deny-list tracciamento
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Nessun SDK di analytics, ads o crash reporting
+        run: ./tool/verifica_privacy.sh
+
+  core:
+    name: Core (Dart puro)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: manutentore_core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+      - run: dart pub get
+      - name: Analisi
+        run: dart analyze --fatal-infos .
+      - name: Test
+        run: dart test
+      # Il core non deve avere dipendenze a runtime: e' l'argomento per cui la
+      # promessa privacy e' credibile (HANDOFF.md §3). Se un giorno ne compare
+      # una, deve essere una decisione, non una svista.
+      - name: Il core resta senza dipendenze a runtime
+        run: |
+          if grep -qE '^dependencies:' pubspec.yaml; then
+            echo "manutentore_core ha acquisito dipendenze a runtime."
+            echo "Vedi HANDOFF.md §3 e §5 prima di rimuovere questo controllo."
+            exit 1
+          fi
+          echo "OK  nessuna dipendenza a runtime."
+
+  app:
+    name: App (Flutter)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: manutentore_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Analisi
+        run: flutter analyze --fatal-infos
+      - name: Test
+        run: flutter test
+      # Il lock risolto vede anche le dipendenze transitive: un pacchetto
+      # approvato potrebbe tirarsi dietro un SDK di tracciamento senza che
+      # nessuno lo scriva mai in un pubspec.yaml. Per questo il controllo gira
+      # una seconda volta, qui, dopo `pub get`.
+      - name: Deny-list sulle dipendenze risolte
+        working-directory: .
+        run: ./tool/verifica_privacy.sh
