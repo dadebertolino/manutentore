@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:manutentore/app.dart';
 import 'package:manutentore/state/cronologia.dart';
 import 'package:manutentore/state/impostazioni.dart';
+import 'package:manutentore/theme/app_theme.dart';
+import 'package:manutentore/ui/calcolatore_page.dart';
 import 'package:manutentore_core/manutentore_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -275,6 +277,51 @@ void main() {
       final cron = await Cronologia.carica();
       expect(cron.voci, hasLength(1));
       expect(cron.voci.first.calcId, 'el.caduta_tensione');
+    });
+  });
+
+  group('testo ingrandito', () {
+    // In campo il text scaling alzato e' la norma, non l'eccezione: chi ha gli
+    // occhiali da lavoro lo tiene su. La `TargaRisultato` ha le cifre piu'
+    // grandi della app, quindi e' il primo posto che cede.
+    Future<void> apri(WidgetTester tester, Calculator c, double scala) async {
+      SharedPreferences.setMockInitialValues({});
+      final imp = await Impostazioni.carica();
+      final cron = await Cronologia.carica();
+      await tester.pumpWidget(
+        ImpostazioniScope(
+          notifier: imp,
+          child: CronologiaScope(
+            notifier: cron,
+            child: MaterialApp(
+              theme: temaScuro(),
+              home: Builder(
+                builder: (context) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scala)),
+                  child: CalcolatorePage(calcolatore: c),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('nessun calcolatore va in overflow al 200%', (tester) async {
+      // Uno schermo da telefono, non gli 800x600 di default dei test.
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      final rotti = <String>[];
+      for (final c in Registro.tutti) {
+        await apri(tester, c, 2.0);
+        if (tester.takeException() != null) rotti.add(c.id);
+      }
+      expect(rotti, isEmpty, reason: 'vanno in overflow: ${rotti.join(", ")}');
     });
   });
 }

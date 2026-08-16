@@ -198,27 +198,34 @@ class _RigaSecondaria extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
+          // Etichetta a sinistra e valore a destra finche' ci stanno; col testo
+          // ingrandito il valore scende sotto invece di sfondare la targa. Il
+          // `SizedBox` serve: senza, il `Wrap` si stringe sui figli e
+          // `spaceBetween` non ha spazio da distribuire.
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.start,
+              spacing: T.s3,
+              runSpacing: 2,
+              children: [
+                Text(
                   riga.label,
                   style: TextStyle(fontSize: 14, color: c.muted, height: 1.3),
                 ),
-              ),
-              const SizedBox(width: T.s3),
-              SelectableText(
-                riga.unit.isEmpty ? riga.value : '${riga.value} ${riga.unit}',
-                style: TextStyle(
-                  fontFamily: T.mono,
-                  fontSize: 14,
-                  color: colore,
-                  fontWeight: FontWeight.w500,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                SelectableText(
+                  riga.unit.isEmpty ? riga.value : '${riga.value} ${riga.unit}',
+                  style: TextStyle(
+                    fontFamily: T.mono,
+                    fontSize: 14,
+                    color: colore,
+                    fontWeight: FontWeight.w500,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           if (riga.note != null)
             Padding(

@@ -41,7 +41,7 @@ manutentore/
     ├── lib/ui/            Home, calcolo generico, cronologia, widget
     ├── assets/fonts/      IBM Plex Sans e Mono (OFL), 5 pesi
     ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
-    └── test/              15 test: UI, cronologia, persistenza input
+    └── test/              16 test: UI, cronologia, testo ingrandito
 
 design/                    Sorgenti SVG dell'icona
 tool/                      verifica_privacy.sh, genera_icone.sh
@@ -62,7 +62,7 @@ Stato verificato il 2026-08-16:
 | package | `analyze` | test |
 |---|---|---|
 | `manutentore_core` | pulito | 37 passati |
-| `manutentore_app`  | pulito | 15 passati |
+| `manutentore_app`  | pulito | 16 passati |
 
 ```bash
 cd manutentore_core && dart pub get && dart analyze && dart test
@@ -301,8 +301,9 @@ aggiornare sia lo script sia questa sezione.
 1. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
    share sheet (mai upload). È la funzione che fa scaricare l'app a chi lavora
    davvero. Valuta `pdf` + `printing` — sono da approvare come dipendenze.
-2. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
-   supporto al text scaling fino a 200% senza overflow nella `TargaRisultato`.
+2. **Accessibilità e uso con i guanti**: target da 48 dp e contrasto
+   verificato. Il text scaling al 200% è già coperto da un test su tutti i
+   calcolatori (vedi §8).
 
 ### Crescere in contenuto
 3. **Altri calcolatori**: sezione da corrente di corto, resistenza di
@@ -355,6 +356,15 @@ aggiornare sia lo script sia questa sezione.
   tree was locked"*. La cronologia registra proprio lì, quindi rimanda la
   notifica con `scheduleMicrotask`: lo stato cambia subito, la notifica aspetta
   la fine dello smontaggio.
+- **Le righe della `TargaRisultato` usano `Wrap`, non `Row`** — non è un
+  vezzo. Con il testo di sistema al 200%, **11 calcolatori su 17** sfondavano
+  di 58 px: il valore in Mono non aveva vincoli di larghezza e spingeva fuori
+  dalla targa. Con la `Wrap` il valore scende sotto l'etichetta invece di
+  sfondare. Il `SizedBox(width: double.infinity)` attorno serve: senza, la
+  `Wrap` si stringe sui figli e `spaceBetween` non ha spazio da distribuire,
+  quindi il valore non va più a destra. C'è un test che apre **tutti** i
+  calcolatori al 200% su uno schermo da telefono e verifica che nessuno vada
+  in overflow: è la rete che impedisce a questa regressione di tornare.
 - **Disclaimer**: la app dà un ordine di grandezza verificabile, non sostituisce
   la norma né il progetto firmato da un tecnico abilitato. Va detto **una
   volta**, in impostazioni (già presente) — non a ogni schermata, o smette di
