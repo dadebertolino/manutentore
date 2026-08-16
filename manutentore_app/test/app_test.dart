@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:manutentore/app.dart';
+import 'package:manutentore/pdf/rapporto.dart';
 import 'package:manutentore/state/cronologia.dart';
 import 'package:manutentore/state/impostazioni.dart';
 import 'package:manutentore/theme/app_theme.dart';
@@ -322,6 +323,37 @@ void main() {
         if (tester.takeException() != null) rotti.add(c.id);
       }
       expect(rotti, isEmpty, reason: 'vanno in overflow: ${rotti.join(", ")}');
+    });
+  });
+
+  group('rapportino PDF', () {
+    testWidgets('si genera per tutti i calcolatori e sta in una pagina', (
+      tester,
+    ) async {
+      // Il pacchetto `pdf` lancia se il contenuto non entra nella pagina, per
+      // cui generarli tutti e' anche la verifica che nessun rapportino
+      // trabocchi dall'A4. Serve un binding per leggere i font da assets.
+      for (final c in Registro.tutti) {
+        final byte = await Rapporto.genera(
+          calcolatore: c,
+          valori: {for (final f in c.fields) f.key: f.initial},
+          risultato: c.compute(Inputs.defaults(c.fields)),
+          quando: DateTime(2026, 3, 9, 14, 5),
+        );
+        expect(byte.length, greaterThan(1000), reason: c.id);
+        // Un PDF vero comincia con %PDF: se i font non fossero stati caricati
+        // otterremmo comunque dei byte, ma non un documento valido.
+        expect(String.fromCharCodes(byte.take(4)), '%PDF', reason: c.id);
+      }
+    });
+
+    test('il nome del file dice cosa e\' e di quando', () {
+      final nome = Rapporto.nomeFile(
+        Registro.byId('me.vibrazioni_iso'),
+        DateTime(2026, 3, 9, 14, 5),
+      );
+      // Niente accenti ne' spazi: finisce nella cartella di chi lo riceve.
+      expect(nome, 'breviario-severita-vibrazioni-20260309-1405.pdf');
     });
   });
 }

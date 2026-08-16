@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:manutentore_core/manutentore_core.dart';
+import 'package:printing/printing.dart';
 
+import '../pdf/rapporto.dart';
 import '../state/cronologia.dart';
 import '../state/impostazioni.dart';
 import '../theme/app_theme.dart';
@@ -176,6 +178,36 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
     ).showSnackBar(const SnackBar(content: Text('Calcolo copiato')));
   }
 
+  /// Genera il rapportino e lo passa al foglio di condivisione del sistema.
+  ///
+  /// Il PDF non viene caricato da nessuna parte: nasce sul telefono e finisce
+  /// dove decide l'utente (HANDOFF §5). `sharePdf` di `printing` usa il foglio
+  /// nativo, quindi non serve nessun permesso.
+  Future<void> _condividiPdf() async {
+    final r = _risultato;
+    if (r == null) return;
+    final calc = widget.calcolatore;
+    final quando = DateTime.now();
+    final messaggero = ScaffoldMessenger.of(context);
+    try {
+      final byte = await Rapporto.genera(
+        calcolatore: calc,
+        valori: _valori,
+        risultato: r,
+        quando: quando,
+      );
+      await Printing.sharePdf(
+        bytes: byte,
+        filename: Rapporto.nomeFile(calc, quando),
+      );
+    } on Object catch (e) {
+      if (!mounted) return;
+      messaggero.showSnackBar(
+        SnackBar(content: Text('Rapportino non riuscito: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final impostazioni = ImpostazioniScope.of(context);
@@ -203,6 +235,11 @@ class _CalcolatorePageState extends State<CalcolatorePage> {
             tooltip: 'Copia il calcolo',
             icon: const Icon(Icons.copy_all_outlined),
             onPressed: _risultato == null ? null : _copia,
+          ),
+          IconButton(
+            tooltip: 'Rapportino PDF',
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            onPressed: _risultato == null ? null : _condividiPdf,
           ),
           IconButton(
             tooltip: 'Reimposta i valori',

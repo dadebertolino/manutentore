@@ -39,9 +39,10 @@ manutentore/
     ├── lib/state/         impostazioni.dart: modalità, tema, preferiti
     │                      cronologia.dart:  ultimi 50 calcoli + input
     ├── lib/ui/            Home, calcolo generico, cronologia, widget
+    ├── lib/pdf/           Rapportino PDF condivisibile
     ├── assets/fonts/      IBM Plex Sans e Mono (OFL), 5 pesi
     ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
-    └── test/              16 test: UI, cronologia, testo ingrandito
+    └── test/              18 test: UI, cronologia, PDF, scaling
 
 design/                    Sorgenti SVG dell'icona
 tool/                      verifica_privacy.sh, genera_icone.sh
@@ -62,7 +63,7 @@ Stato verificato il 2026-08-16:
 | package | `analyze` | test |
 |---|---|---|
 | `manutentore_core` | pulito | 37 passati |
-| `manutentore_app`  | pulito | 16 passati |
+| `manutentore_app`  | pulito | 18 passati |
 
 ```bash
 cd manutentore_core && dart pub get && dart analyze && dart test
@@ -172,6 +173,20 @@ cuscinetto: l'artefatto che il manutentore già sa leggere.
   il sole, non è il caso principale.
 - **Raggio 6 px**, non pillole. È una targa, non un bottone di un social.
 
+### Il rapportino PDF non è la app su carta
+In app il fondo è scuro perché si lavora in cabina. Sul foglio il fondo è la
+carta: una targa nera sarebbe toner sprecato e illeggibile in fotocopia. Il
+PDF è quindi chiaro, e tiene solo le due cose che portano significato — il
+**Mono per le cifre** e i **colori del verdetto**, che dicono cosa succede
+all'impianto. Il giallo non compare: marca ciò che l'utente tocca, e su un
+foglio non si tocca niente.
+
+La banda del verdetto usa una tinta calcolata mescolando col bianco, **non il
+canale alfa**: nel PDF l'alfa non viene composta come ci si aspetta, e il
+risultato era una banda a tinta piena col testo dello stesso colore, cioè un
+verdetto invisibile. I test non se ne erano accorti — i byte erano un PDF
+valido lo stesso. Guarda il documento, non solo il test.
+
 ### Avvio — scuro, non di sistema
 Lo sfondo di avvio è `#171A1D` fisso su entrambe le piattaforme: iOS nel
 `LaunchScreen.storyboard`, Android in `@color/sfondo_avvio` usato sia dal
@@ -234,7 +249,8 @@ e deve restare vera *e verificabile*.
 - **Permessi di sistema: il minimo**, chiesti al momento dell'uso. Oggi l'app
   non ne richiede nessuno. Se una feature ne introduce uno, va discusso prima.
 - **Nuove dipendenze**: prima di aggiungere qualsiasi cosa a `pubspec.yaml`,
-  chiedi. Oggi l'unica è `shared_preferences`.
+  chiedi. Oggi sono tre, tutte approvate: `shared_preferences` per la
+  persistenza locale, `pdf` e `printing` per il rapportino.
 - **Store**: categoria Education o Utilities, mai Medical. Play target audience
   18+. Data safety: nessun dato raccolto.
 
@@ -258,7 +274,7 @@ Fa tre controlli:
    transitiva. È la garanzia più forte che l'app abbia, e non va persa per
    distrazione. I manifest di `debug` e `profile` lo dichiarano perché serve
    all'hot reload, e non vengono spediti.
-3. **Nessuna chiamata di rete nel nostro codice**: né `package:http`, né le API
+2. **Nessuna chiamata di rete nel nostro codice**: né `package:http`, né le API
    di `printing` che scaricano font (`PdfGoogleFonts`, `downloadFont`). Vedi
    sotto perché serve.
 
@@ -326,23 +342,20 @@ aggiornare sia lo script sia questa sezione.
 ## 7. Backlog, in ordine
 
 ### Rendere usabile in campo
-1. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
-   share sheet (mai upload). È la funzione che fa scaricare l'app a chi lavora
-   davvero. Valuta `pdf` + `printing` — sono da approvare come dipendenze.
-2. **Accessibilità e uso con i guanti**: target da 48 dp e contrasto
+1. **Accessibilità e uso con i guanti**: target da 48 dp e contrasto
    verificato. Il text scaling al 200% è già coperto da un test su tutti i
    calcolatori (vedi §8).
 
 ### Crescere in contenuto
-3. **Altri calcolatori**: sezione da corrente di corto, resistenza di
+2. **Altri calcolatori**: sezione da corrente di corto, resistenza di
    isolamento, termocoppie K/J, ISO VG e compatibilità grassi, allineamento
    alberi, tolleranze ISO H7/g6, perdite di carico nelle tubazioni, MTBF/MTTR
    e OEE.
-4. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
+3. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
    ISO 1219, codici colore, classi IP/IK, coppie di serraggio a colpo d'occhio.
    Serve un nuovo tipo di scheda nel registro — progettalo, non forzarlo dentro
    `Calculator`.
-5. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
+4. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
    all'avviamento"*, *"cuscinetto rumoroso"*: sequenze di verifiche dove
    l'esito determina il passo successivo. È la parte con più valore didattico
    e la meno banale da modellare: **serve un modello dati nuovo** (nodo,
@@ -350,7 +363,7 @@ aggiornare sia lo script sia questa sezione.
    Davide prima di implementare.
 
 ### Pubblicare
-6. Splash, screenshot **senza dati reali**, testi store con inquadramento
+5. Splash, screenshot **senza dati reali**, testi store con inquadramento
    adulto, privacy policy su davidebertolino.it. Icona e sezione privacy del
    README sono fatte.
 

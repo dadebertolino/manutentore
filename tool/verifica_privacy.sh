@@ -122,9 +122,14 @@ fi
 # assets/fonts/ (§4: self-hosted, mai da CDN). Su Android il permesso mancante
 # basterebbe; su iOS non esiste un permesso per la rete, quindi li' l'unica
 # garanzia e' che quelle chiamate non compaiano nel nostro codice.
+#
+# I commenti sono esclusi di proposito: spiegare *perche'* non si usa
+# `PdfGoogleFonts` e' utile alla prossima persona, e un controllo che punisce
+# la documentazione finisce per farla cancellare. Qui conta il codice.
 SORGENTI="manutentore_app/lib manutentore_core/lib"
 VIETATE_IN_CODICE='package:http/|PdfGoogleFonts|downloadFont|PdfBaseCache'
-if colpite=$(grep -rnE "$VIETATE_IN_CODICE" $SORGENTI 2>/dev/null); then
+if colpite=$(grep -rnE "$VIETATE_IN_CODICE" $SORGENTI 2>/dev/null \
+             | grep -vE '^[^:]+:[0-9]+:[[:space:]]*//'); then
   echo
   echo "BLOCCATO  il codice usa API che fanno rete:"
   echo "$colpite" | sed 's/^/          /'
