@@ -41,9 +41,8 @@ indipendentemente prima di essere scritti nei test, non estratti dal codice.
 Se un test del core fallisce, **il sospettato numero uno è il test, non la
 formula**: ricontrolla il valore atteso a mano prima di toccare il calcolo.
 
-I font IBM Plex non sono ancora nel repo. Manca in silenzio: l'app ripiega sul
-font di sistema senza segnalare nulla, e le cifre smettono di essere tabulari.
-Vedi `HANDOFF.md` §4.
+I font IBM Plex (OFL) sono self-hosted in `manutentore_app/assets/fonts/`, nei
+soli cinque pesi che la UI usa. Mai da CDN: vedi `HANDOFF.md` §4 e §5.
 
 ## Privacy
 

@@ -138,16 +138,21 @@ cuscinetto: l'artefatto che il manutentore già sa leggere.
   il sole, non è il caso principale.
 - **Raggio 6 px**, non pillole. È una targa, non un bottone di un social.
 
-### Font — da fare
-I file non sono nel repo e `assets/` non esiste ancora. Scaricare **IBM Plex
-Sans** e **IBM Plex Mono** (licenza OFL) in `assets/fonts/` e decommentare il
-blocco `fonts:` in `pubspec.yaml`. **Self-hosted, mai da CDN** (§5).
+### Font — fatti
+**IBM Plex Sans** e **IBM Plex Mono** sono in `assets/fonts/`, self-hosted e
+mai da CDN (§5), con la licenza OFL accanto in `OFL.txt`. Scaricati dalle
+release ufficiali IBM/plex (`@ibm/plex-sans@1.1.0`, `@ibm/plex-mono@2.5.0`).
 
-Il codice referenzia già le famiglie per nome (`T.sans`, `T.mono`), quindi
-finché i file mancano **il ripiego sul font di sistema è silenzioso**: nessun
-errore, nessun avviso, l'app gira e sembra a posto. Cambia solo che le cifre
-non sono tabulari e ballano mentre si digita. È una regressione che non si vede
-in uno screenshot: non fidarti dell'occhio, controlla che gli asset ci siano.
+Ci sono **solo i cinque pesi che la UI usa davvero** — Sans 400/500/600, Mono
+400/500, nessun corsivo — per circa 950 kB. Non è avarizia: è peso che il
+manutentore si scarica, e i pesi non usati non li vede nessuno. Se ti serve un
+peso nuovo, aggiungi il `.ttf` *e* la riga in `pubspec.yaml`.
+
+Il ripiego sul font di sistema **non è più silenzioso**: ora che gli asset sono
+dichiarati nel `pubspec.yaml`, se un file sparisce `flutter build` si ferma con
+*"unable to locate asset entry"*. Verificato togliendo un file apposta. Vale
+solo per i cinque dichiarati: se aggiungi un peso al codice senza aggiungerlo
+al pubspec, torni al ripiego muto.
 
 ---
 
@@ -218,31 +223,28 @@ aggiornare sia lo script sia questa sezione.
 
 ## 7. Backlog, in ordine
 
-### Sbloccare
-1. **Font IBM Plex** in `assets/fonts/`. Vedi §4: oggi manca in silenzio.
-
 ### Rendere usabile in campo
-2. **Cronologia dei calcoli**: ultimi 50, locale, con ripristino degli input.
+1. **Cronologia dei calcoli**: ultimi 50, locale, con ripristino degli input.
    Stesso pattern di `preferiti` in `Impostazioni`.
-3. **Persistenza degli input per calcolatore**: riaprendo un calcolatore
+2. **Persistenza degli input per calcolatore**: riaprendo un calcolatore
    ritrova gli ultimi valori usati. In campo si rifà lo stesso calcolo con una
    variabile diversa.
-4. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
+3. **Rapportino PDF**: compili in campo, esci con un PDF condivisibile via
    share sheet (mai upload). È la funzione che fa scaricare l'app a chi lavora
    davvero. Valuta `pdf` + `printing` — sono da approvare come dipendenze.
-5. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
+4. **Accessibilità e uso con i guanti**: target da 48 dp, contrasto verificato,
    supporto al text scaling fino a 200% senza overflow nella `TargaRisultato`.
 
 ### Crescere in contenuto
-6. **Altri calcolatori**: sezione da corrente di corto, resistenza di
+5. **Altri calcolatori**: sezione da corrente di corto, resistenza di
    isolamento, termocoppie K/J, ISO VG e compatibilità grassi, allineamento
    alberi, tolleranze ISO H7/g6, perdite di carico nelle tubazioni, MTBF/MTTR
    e OEE.
-7. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
+6. **Tabelle di consultazione** (non calcolatori): simbologia CEI/IEC e
    ISO 1219, codici colore, classi IP/IK, coppie di serraggio a colpo d'occhio.
    Serve un nuovo tipo di scheda nel registro — progettalo, non forzarlo dentro
    `Calculator`.
-8. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
+7. **Alberi diagnostici guidati** — *"il motore non parte"*, *"il quadro scatta
    all'avviamento"*, *"cuscinetto rumoroso"*: sequenze di verifiche dove
    l'esito determina il passo successivo. È la parte con più valore didattico
    e la meno banale da modellare: **serve un modello dati nuovo** (nodo,
@@ -250,7 +252,7 @@ aggiornare sia lo script sia questa sezione.
    Davide prima di implementare.
 
 ### Pubblicare
-9. Icona, splash, screenshot **senza dati reali**, testi store con
+8. Icona, splash, screenshot **senza dati reali**, testi store con
    inquadramento adulto, privacy policy su davidebertolino.it, README con
    sezione privacy.
 
