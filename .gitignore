@@ -9,3 +9,6 @@ build/
 .idea/
 .vscode/
 _scaffold/
+
+# Firma personale, vedi ios/Flutter/Local.xcconfig
+Local.xcconfig

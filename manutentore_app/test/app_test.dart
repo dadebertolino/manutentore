@@ -1,10 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:manutentore/app.dart';
+import 'dart:io';
+
+import 'package:manutentore/main.dart' show registraLicenzaFont;
 import 'package:manutentore/pdf/rapporto.dart';
 import 'package:manutentore/state/cronologia.dart';
 import 'package:manutentore/state/impostazioni.dart';
 import 'package:manutentore/theme/app_theme.dart';
+import 'package:manutentore/versione.dart';
 import 'package:manutentore/ui/calcolatore_page.dart';
 import 'package:manutentore_core/manutentore_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -354,6 +359,49 @@ void main() {
       );
       // Niente accenti ne' spazi: finisce nella cartella di chi lo riceve.
       expect(nome, 'breviario-severita-vibrazioni-20260309-1405.pdf');
+    });
+  });
+
+  group('informazioni', () {
+    test('la versione mostrata combacia con pubspec.yaml', () {
+      // La versione e' scritta a mano in versione.dart per non aggiungere un
+      // plugin solo per leggerla. Questo test e' il prezzo: se le due
+      // divergono la build diventa rossa, invece di mostrare agli utenti un
+      // numero sbagliato.
+      final pubspec = File('pubspec.yaml').readAsStringSync();
+      // Dart non accetta i modificatori inline tipo (?m): vuole il parametro.
+      final m = RegExp(
+        r'^version:\s*([0-9.]+)\+([0-9]+)',
+        multiLine: true,
+      ).firstMatch(pubspec);
+      expect(m, isNotNull, reason: 'version: non trovata in pubspec.yaml');
+      expect(versioneApp, m!.group(1));
+      expect(buildApp.toString(), m.group(2));
+    });
+
+    testWidgets('la pagina si apre dalle impostazioni', (tester) async {
+      await avvia(tester);
+      await tester.tap(find.byTooltip('Impostazioni'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Informazioni e licenze'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Versione $versioneApp'), findsOneWidget);
+      expect(find.textContaining('Davide Bertolino'), findsOneWidget);
+    });
+
+    testWidgets('la OFL dei font finisce nell\'elenco licenze', (tester) async {
+      // Ridistribuiamo IBM Plex: la licenza chiede che il testo viaggi coi
+      // font, e averlo in assets non basta se non lo vede nessuno.
+      LicenseRegistry.reset();
+      addTearDown(LicenseRegistry.reset);
+      registraLicenzaFont();
+
+      final licenze = await LicenseRegistry.licenses.toList();
+      final ibm = licenze.where((l) => l.packages.contains('IBM Plex'));
+      expect(ibm, isNotEmpty, reason: 'licenza dei font non registrata');
+      final testo = ibm.first.paragraphs.map((p) => p.text).join(' ');
+      expect(testo.toUpperCase(), contains('SIL OPEN FONT LICENSE'));
     });
   });
 }

@@ -38,11 +38,11 @@ manutentore/
     ├── lib/theme/         Token e temi chiaro/scuro
     ├── lib/state/         impostazioni.dart: modalità, tema, preferiti
     │                      cronologia.dart:  ultimi 50 calcoli + input
-    ├── lib/ui/            Home, calcolo generico, cronologia, widget
+    ├── lib/ui/            Home, calcolo, cronologia, informazioni, widget
     ├── lib/pdf/           Rapportino PDF condivisibile
     ├── assets/fonts/      IBM Plex Sans e Mono (OFL), 5 pesi
     ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
-    └── test/              18 test: UI, cronologia, PDF, scaling
+    └── test/              21 test: UI, cronologia, PDF, scaling, info
 
 design/                    Sorgenti SVG dell'icona
 tool/                      verifica_privacy.sh, genera_icone.sh
@@ -63,7 +63,7 @@ Stato verificato il 2026-08-16:
 | package | `analyze` | test |
 |---|---|---|
 | `manutentore_core` | pulito | 37 passati |
-| `manutentore_app`  | pulito | 18 passati |
+| `manutentore_app`  | pulito | 21 passati |
 
 ```bash
 cd manutentore_core && dart pub get && dart analyze && dart test
@@ -407,9 +407,13 @@ aggiornare sia lo script sia questa sezione.
   calcolatori al 200% su uno schermo da telefono e verifica che nessuno vada
   in overflow: è la rete che impedisce a questa regressione di tornare.
 - **Disclaimer**: la app dà un ordine di grandezza verificabile, non sostituisce
-  la norma né il progetto firmato da un tecnico abilitato. Va detto **una
-  volta**, in impostazioni (già presente) — non a ogni schermata, o smette di
-  essere letto.
+  la norma né il progetto firmato da un tecnico abilitato. Sta **una volta
+  sola**, in `InfoPage` — non a ogni schermata, o smette di essere letto. Il
+  foglio impostazioni ci porta, non ne tiene una seconda copia.
+- **`assets:` e `fonts:` non sono la stessa cosa.** Dichiarare i `.ttf` sotto
+  `fonts:` non rende leggibile a runtime un file che sta nella stessa
+  cartella: `OFL.txt` serviva anche in `assets:`, e senza, la licenza dei
+  font non si caricava — nella app vera, non solo nei test.
 
 ---
 

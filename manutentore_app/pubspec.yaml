@@ -26,6 +26,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    # Il testo della licenza dei font: va mostrato in `showLicensePage`, quindi
+    # deve essere leggibile a runtime. Dichiarare i .ttf sotto `fonts:` non
+    # basta a rendere disponibile un file che sta nella stessa cartella.
+    - assets/fonts/OFL.txt
   # IBM Plex, self-hosted in assets/fonts/, mai da CDN (HANDOFF.md §5).
   # Ci sono solo i cinque pesi che la UI usa davvero (400/500/600, niente
   # corsivi): sono ~950 kB, e ogni file in piu' e' peso che il manutentore si

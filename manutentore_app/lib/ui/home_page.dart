@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'calcolatore_page.dart';
 import 'cronologia_page.dart';
+import 'info_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -124,72 +125,85 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      // Scorrevole di proposito: il foglio e' alto al massimo una frazione
+      // dello schermo, e con il testo di sistema ingrandito, o su un telefono
+      // piccolo, il contenuto non ci sta. Meglio scorrere che sfondare.
+      isScrollControlled: true,
       builder: (_) => SafeArea(
         child: ListenableBuilder(
           listenable: imp,
-          builder: (context, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _TitoloSheet('Modalità'),
-              SegmentedButton<Modalita>(
-                segments: const [
-                  ButtonSegment(
-                    value: Modalita.professionista,
-                    label: Text('Professionista'),
-                  ),
-                  ButtonSegment(
-                    value: Modalita.studente,
-                    label: Text('Studente'),
-                  ),
-                ],
-                selected: {imp.modalita},
-                onSelectionChanged: (s) => imp.impostaModalita(s.first),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(T.s4, T.s2, T.s4, T.s4),
-                child: Text(
-                  imp.isStudente
-                      ? 'Mostra la spiegazione, gli aiuti sui campi e le avvertenze.'
-                      : 'Solo campi e risultato. Niente prosa.',
-                  style: TextStyle(color: context.c.muted, fontSize: 13),
+          builder: (context, _) => SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _TitoloSheet('Modalità'),
+                SegmentedButton<Modalita>(
+                  segments: const [
+                    ButtonSegment(
+                      value: Modalita.professionista,
+                      label: Text('Professionista'),
+                    ),
+                    ButtonSegment(
+                      value: Modalita.studente,
+                      label: Text('Studente'),
+                    ),
+                  ],
+                  selected: {imp.modalita},
+                  onSelectionChanged: (s) => imp.impostaModalita(s.first),
                 ),
-              ),
-              const _TitoloSheet('Aspetto'),
-              SegmentedButton<PreferenzaTema>(
-                segments: const [
-                  ButtonSegment(
-                    value: PreferenzaTema.scuro,
-                    label: Text('Scuro'),
-                  ),
-                  ButtonSegment(
-                    value: PreferenzaTema.chiaro,
-                    label: Text('Chiaro'),
-                  ),
-                  ButtonSegment(
-                    value: PreferenzaTema.sistema,
-                    label: Text('Sistema'),
-                  ),
-                ],
-                selected: {imp.tema},
-                onSelectionChanged: (s) => imp.impostaTema(s.first),
-              ),
-              const SizedBox(height: T.s5),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: T.s4),
-                child: Text(
-                  'Nessun account, nessuna rete, nessuna raccolta dati. '
-                  'I calcoli danno un ordine di grandezza verificabile: non '
-                  'sostituiscono la norma né il progetto firmato.',
-                  style: TextStyle(
-                    color: context.c.muted,
-                    fontSize: 12,
-                    height: 1.4,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(T.s4, T.s2, T.s4, T.s4),
+                  child: Text(
+                    imp.isStudente
+                        ? 'Mostra la spiegazione, gli aiuti sui campi e le avvertenze.'
+                        : 'Solo campi e risultato. Niente prosa.',
+                    style: TextStyle(color: context.c.muted, fontSize: 13),
                   ),
                 ),
-              ),
-              const SizedBox(height: T.s5),
-            ],
+                const _TitoloSheet('Aspetto'),
+                SegmentedButton<PreferenzaTema>(
+                  segments: const [
+                    ButtonSegment(
+                      value: PreferenzaTema.scuro,
+                      label: Text('Scuro'),
+                    ),
+                    ButtonSegment(
+                      value: PreferenzaTema.chiaro,
+                      label: Text('Chiaro'),
+                    ),
+                    ButtonSegment(
+                      value: PreferenzaTema.sistema,
+                      label: Text('Sistema'),
+                    ),
+                  ],
+                  selected: {imp.tema},
+                  onSelectionChanged: (s) => imp.impostaTema(s.first),
+                ),
+                const SizedBox(height: T.s4),
+                // Il disclaimer per esteso sta in InfoPage, in un posto solo
+                // (§8): qui c'e' la porta, non una seconda copia.
+                ListTile(
+                  leading: const Icon(Icons.info_outline, size: 20),
+                  title: const Text('Informazioni e licenze'),
+                  subtitle: Text(
+                    'Versione, privacy, limiti d\'uso',
+                    style: TextStyle(color: context.c.muted, fontSize: 12.5),
+                  ),
+                  onTap: () {
+                    // Il navigatore va preso *prima* di chiudere il foglio:
+                    // dopo il pop questo context e' disattivato e cercarci
+                    // dentro un antenato non e' piu' lecito.
+                    final navigatore = Navigator.of(context);
+                    navigatore.pop();
+                    navigatore.push(
+                      MaterialPageRoute<void>(builder: (_) => const InfoPage()),
+                    );
+                  },
+                ),
+                const SizedBox(height: T.s3),
+              ],
+            ),
           ),
         ),
       ),
