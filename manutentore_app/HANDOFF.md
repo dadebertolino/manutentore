@@ -42,7 +42,7 @@ manutentore/
     ├── lib/pdf/           Rapportino PDF condivisibile
     ├── assets/fonts/      IBM Plex Sans e Mono (OFL), 5 pesi
     ├── android/ ios/      Scaffold nativo, it.davidebertolino.manutentore
-    └── test/              21 test: UI, cronologia, PDF, scaling, info
+    └── test/              24 test: UI, cronologia, PDF, scaling, avvio
 
 design/                    Sorgenti SVG dell'icona
 tool/                      verifica_privacy.sh, genera_icone.sh
@@ -63,7 +63,7 @@ Stato verificato il 2026-08-16:
 | package | `analyze` | test |
 |---|---|---|
 | `manutentore_core` | pulito | 37 passati |
-| `manutentore_app`  | pulito | 21 passati |
+| `manutentore_app`  | pulito | 24 passati |
 
 ```bash
 cd manutentore_core && dart pub get && dart analyze && dart test
@@ -187,7 +187,27 @@ risultato era una banda a tinta piena col testo dello stesso colore, cioè un
 verdetto invisibile. I test non se ne erano accorti — i byte erano un PDF
 valido lo stesso. Guarda il documento, non solo il test.
 
-### Avvio — scuro, non di sistema
+### Due schermate di avvio, non una
+Sono cose diverse e conviene non confonderle:
+
+- Il **launch screen nativo** (storyboard iOS, `windowBackground` Android) è
+  quello che si vede *prima* che Flutter parta. Può essere solo un colore o
+  un'immagine statica, e qui è il fondo scuro descritto sotto.
+- La **`SchermataAvvio`** è un widget Flutter e arriva dopo: mostra marchio,
+  nome, versione e autore. La versione la può leggere solo lei, perché è un
+  valore Dart.
+
+La `SchermataAvvio` dura **1,4 s e si salta con un tocco**, e il motivo è
+scritto qui perché non venga "migliorato" allungandola: la tesi della app è
+*si apre, si tira fuori un numero, si chiude*, e uno schermo che si mette in
+mezzo a ogni avvio la contraddice. Se un giorno deve durare di più, la domanda
+giusta è perché.
+
+Il marchio è **disegnato con un `CustomPainter`**, non un PNG: stessa
+geometria di `design/icona.svg`, così l'icona e l'avvio non possono divergere,
+e l'omega usa il Mono già in bundle.
+
+### Avvio nativo — scuro, non di sistema
 Lo sfondo di avvio è `#171A1D` fisso su entrambe le piattaforme: iOS nel
 `LaunchScreen.storyboard`, Android in `@color/sfondo_avvio` usato sia dal
 `launch_background` sia dal `windowBackground` del `NormalTheme`.

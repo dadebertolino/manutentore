@@ -9,6 +9,7 @@ import 'package:manutentore/pdf/rapporto.dart';
 import 'package:manutentore/state/cronologia.dart';
 import 'package:manutentore/state/impostazioni.dart';
 import 'package:manutentore/theme/app_theme.dart';
+import 'package:manutentore/ui/schermata_avvio.dart';
 import 'package:manutentore/versione.dart';
 import 'package:manutentore/ui/calcolatore_page.dart';
 import 'package:manutentore_core/manutentore_core.dart';
@@ -28,6 +29,9 @@ Future<Cronologia> avvia(WidgetTester tester) async {
   final imp = await Impostazioni.carica();
   final cron = await Cronologia.carica();
   await tester.pumpWidget(BreviarioApp(impostazioni: imp, cronologia: cron));
+  // La app apre sulla schermata di avvio: qui la si scavalca, cosi' i test
+  // parlano della home e non del logo.
+  await tester.pump(SchermataAvvio.durata);
   await tester.pumpAndSettle();
   return cron;
 }
@@ -402,6 +406,44 @@ void main() {
       expect(ibm, isNotEmpty, reason: 'licenza dei font non registrata');
       final testo = ibm.first.paragraphs.map((p) => p.text).join(' ');
       expect(testo.toUpperCase(), contains('SIL OPEN FONT LICENSE'));
+    });
+  });
+
+  group('schermata di avvio', () {
+    Future<void> apri(WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(
+        BreviarioApp(
+          impostazioni: await Impostazioni.carica(),
+          cronologia: await Cronologia.carica(),
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets('mostra nome, versione e autore', (tester) async {
+      await apri(tester);
+      expect(find.text('Breviario'), findsOneWidget);
+      expect(find.text('del manutentore'), findsOneWidget);
+      expect(find.text('Versione $versioneApp ($buildApp)'), findsOneWidget);
+      expect(find.text('Davide Bertolino'), findsOneWidget);
+    });
+
+    testWidgets('si toglie di mezzo da sola', (tester) async {
+      await apri(tester);
+      expect(find.text('del manutentore'), findsOneWidget);
+      await tester.pump(SchermataAvvio.durata);
+      await tester.pumpAndSettle();
+      expect(find.text('del manutentore'), findsNothing);
+      expect(find.text('ELETTRICO'), findsOneWidget);
+    });
+
+    testWidgets('un tocco la salta senza aspettare', (tester) async {
+      // In campo non si aspetta: chi tocca vuole il calcolatore, subito.
+      await apri(tester);
+      await tester.tap(find.text('del manutentore'));
+      await tester.pumpAndSettle();
+      expect(find.text('ELETTRICO'), findsOneWidget);
     });
   });
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'state/cronologia.dart';
 import 'state/impostazioni.dart';
 import 'theme/app_theme.dart';
-import 'ui/home_page.dart';
+import 'ui/schermata_avvio.dart';
 
 class BreviarioApp extends StatelessWidget {
   const BreviarioApp({
@@ -37,7 +37,7 @@ class BreviarioApp extends StatelessWidget {
               PreferenzaTema.scuro => ThemeMode.dark,
               PreferenzaTema.sistema => ThemeMode.system,
             },
-            home: const HomePage(),
+            home: const SchermataAvvio(),
           ),
         ),
       ),
